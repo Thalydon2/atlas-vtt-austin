@@ -1,9 +1,9 @@
 {
-  "id": "atlas-vtt",
-  "name": "Atlas VTT",
+  "id": "atlas-vtt-austin",
+  "name": "Atlas VTT (Austin)",
   "version": "0.8.0",
   "minAppVersion": "1.8.7",
-  "description": "Run tabletop RPG battle maps with tokens, fog of war, grids, dice and a separate player view.",
+  "description": "Austin's fork of Atlas VTT: character sheets, pins shown to players, loot to sheets and axis-locked panning. Run tabletop RPG battle maps with tokens, fog of war, grids, dice and a separate player view.",
   "author": "Fabian Urbanek",
   "authorUrl": "https://github.com/ByteMirror",
   "isDesktopOnly": true

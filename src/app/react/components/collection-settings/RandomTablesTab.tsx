@@ -49,7 +49,11 @@ export function RandomTablesTab(props: RandomTablesTabProps): React.ReactElement
   const sources = useMemo(() => readRandomTables({ randomTables: [...randomTables] }), [randomTables]);
   const { tables } = useNoteTables(app, sources);
   const [adding, setAdding] = useState<Adding>(null);
-  const baseFiles = useMemo(() => app.vault.getFiles().filter((file) => file.extension === 'base'), [app]);
+  // Only while a base is being picked, and only the bases not added yet.
+  const baseFiles = useMemo(
+    () => (adding === 'base' ? app.vault.getFiles().filter((file) => file.extension === 'base' && !lootBases.includes(file.path)) : []),
+    [app, adding, lootBases],
+  );
   const listed = useMemo(() => new Set(sources.map(tableSourceId)), [sources]);
   const notes = [...new Set(sources.map((source) => source.path))];
 

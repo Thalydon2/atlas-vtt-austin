@@ -77,6 +77,7 @@ import { sbToken } from './sbToken';
 import { validation } from './validation';
 import { issue } from './issue';
 import { changelog } from './changelog';
+import { characterSheet } from './characterSheet';
 import { tour } from './tour';
 import { creatureFilter } from './creatureFilter';
 import { encounter } from './encounter';
@@ -168,6 +169,7 @@ export const en = {
   ...validation,
   ...issue,
   ...changelog,
+  ...characterSheet,
   ...tour,
   ...creatureFilter,
   ...encounter,

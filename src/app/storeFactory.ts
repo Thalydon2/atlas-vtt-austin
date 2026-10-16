@@ -8,7 +8,7 @@ import type { StorageValue } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import type { App, Plugin } from 'obsidian';
 import type AtlasVTTPlugin from '../../main';
-import type { TokenEntity, Character, NotePin, TextElement, DrawingStroke } from './types';
+import type { TokenEntity, Character, NotePin, PinPlayerVisibility, TextElement, DrawingStroke } from './types';
 import type { FogOperation, FogOperationInput } from './types/fogTypes';
 import type { WallSegment, WallInput } from './types/wallTypes';
 import { DEFAULT_SCENE_LIGHTING, type LightChanges, type LightInput, type LightZoneChanges, type LightZoneInput, type SceneLightingChanges, type SceneLightingOption } from './types/lightingTypes';
@@ -109,7 +109,7 @@ export interface ViewAtlasState extends ViewState {
 
   // Note Pin actions
   /** With `hex`, the note is linked to the hex containing (x, y) rather than pinned to the point. */
-  addNotePin: (x: number, y: number, notePath: string, icon?: string, options?: { hex?: boolean }) => string;
+  addNotePin: (x: number, y: number, notePath: string, icon?: string, options?: { hex?: boolean; playerVisibility?: PinPlayerVisibility }) => string;
   /** A field given as undefined is removed. */
   updateNotePin: (id: string, updates: { [K in keyof Omit<NotePin, 'id' | 'kind'>]?: NotePin[K] | undefined }) => void;
   moveNotePin: (id: string, x: number, y: number) => void;
@@ -902,6 +902,9 @@ export function createViewAtlasStore(app: App, viewId: string, plugin?: AtlasVTT
               }
               if (options?.hex) {
                 newPin.hex = true;
+              }
+              if (options?.playerVisibility) {
+                newPin.playerVisibility = options.playerVisibility;
               }
               if (isPinLabelKind(icon)) {
                 newPin.label = nextPinLabel(draft.objects.pins, icon);

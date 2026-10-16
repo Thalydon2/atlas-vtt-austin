@@ -4,9 +4,13 @@ import { assetTypeOfTab, tabHasFolders } from './tabKinds';
 
 const FOLDER_ID_PREFIX = 'folder-';
 
+/** Character sheets are `character` records, whose files lie in `characters/`. */
+const FOLDER_OF_TYPE: Partial<Record<ReturnType<typeof assetTypeOfTab>, string>> = { sheets: 'characters' };
+
 /** The vault folder holding a tab's assets in a collection; player characters lie among the tokens. */
 export function tabFolderPath(collection: string, tab: Tab): string {
-  return `${ATLAS_VTT_DIR}/collections/${collection}/${assetTypeOfTab(tab)}`;
+  const type = assetTypeOfTab(tab);
+  return `${ATLAS_VTT_DIR}/collections/${collection}/${FOLDER_OF_TYPE[type] ?? type}`;
 }
 
 /** Asset manager folders are identified by their vault path. */

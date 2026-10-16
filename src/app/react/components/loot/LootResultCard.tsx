@@ -7,6 +7,7 @@ import type { LootDraw } from '../../../loot/lootRoller';
 import { EASE_OUT_CONTROL_POINTS, PANEL_ENTER_FROM, PANEL_ENTER_MS } from '../../../utils/motion';
 import { LootItemContent } from './LootItemContent';
 import { LootGiveButton } from './LootGiveButton';
+import { LootSheetGiveButton } from './LootSheetGiveButton';
 import { rarityTone } from '../../../loot/lootRarity';
 import { t } from '../../../i18n';
 
@@ -45,6 +46,7 @@ function LootResultCardView({ draw, fresh, order, onOpenSource, onOpenLink, show
         actions={(
           <>
             <LootGiveButton draw={draw} />
+            <LootSheetGiveButton draw={draw} />
             <LabelTooltip label={shownToPlayers ? t('widgets.hideFromPlayers') : t('widgets.showToPlayers')}>
               <Button
                 variant="ghost"

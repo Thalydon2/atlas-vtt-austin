@@ -1,6 +1,7 @@
 import { Application, Ticker, type ApplicationOptions } from "pixi.js";
 import { Viewport } from "pixi-viewport";
 import { SmoothDecelerate } from "./SmoothDecelerate";
+import { AxisLockDrag } from "./AxisLockDrag";
 import { RenderScheduler } from "./RenderScheduler";
 import { destroyTree } from "./utils/destroyTree";
 import { usesCanvasRenderer } from "./utils/rendererType";
@@ -169,8 +170,9 @@ export class PixiAppManager {
     this.viewport.interactiveChildren = true;
     this.viewport.sortableChildren = true; // Enable z-index sorting
 
+    // The pan locks to one axis while Shift is held (`AxisLockDrag`).
+    this.viewport.plugins.add('drag', new AxisLockDrag(this.viewport, { mouseButtons: 'right', pressDrag: true }));
     this.viewport
-      .drag({ mouseButtons: 'right', pressDrag: true })
       .clampZoom({
         minScale: MIN_ZOOM,
         maxScale: MAX_ZOOM,

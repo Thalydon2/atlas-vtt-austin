@@ -20,7 +20,12 @@ export interface NotePin {
   hex?: boolean;
   /** Players may read the linked note (or the heading it names) once they find the pin on the map. */
   readable?: true;
+  /** Shown in the local player window: its icon, or its icon and, while the GM holds Cmd/Ctrl over it, its note. Unset: GM only. */
+  playerVisibility?: PinPlayerVisibility;
 }
+
+/** How a note pin shows in the local player window (`NotePin.playerVisibility`). */
+export type PinPlayerVisibility = 'icon' | 'note';
 
 /** A bounded resource value saved on an individual map token. */
 export interface TokenResourceValue {
@@ -87,6 +92,8 @@ export interface Character extends BaseToken {
   statblockPath?: string; // Path to linked statblock note
   /** Name read from the linked statblock; the nameplate falls back to it when `name` is empty. */
   statblockName?: string | null;
+  /** The character sheet (a `character` asset) the token was placed from; its hover preview shows the sheet. */
+  characterSheetId?: string;
 }
 
 /**

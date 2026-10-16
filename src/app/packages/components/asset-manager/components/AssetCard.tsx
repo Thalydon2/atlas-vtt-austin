@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useId } from 'react';
-import { Map as MapIcon, ScrollText } from 'lucide-react';
+import { Map as MapIcon, ScrollText, User } from 'lucide-react';
 import type { AnyAsset } from '../types';
 import type { AssetCardHandlers } from '../hooks/useAssetCardHandlers';
 import { TokenPortrait } from '../../shared/TokenPortrait';
@@ -20,7 +20,7 @@ export interface AssetCardProps extends AssetCardHandlers {
 function ArtFallback({ asset }: { asset: AnyAsset }): React.JSX.Element {
   return (
     <div className="atlas-asset-placeholder-icon">
-      {asset.type === 'scenes' ? <MapIcon size={28} /> : asset.name.charAt(0).toUpperCase()}
+      {asset.type === 'scenes' ? <MapIcon size={28} /> : asset.type === 'sheets' ? <User size={28} /> : asset.name.charAt(0).toUpperCase()}
     </div>
   );
 }
@@ -156,6 +156,7 @@ export const AssetCard = memo(function AssetCard({
             )}
           </div>
           <span id={nameId} className="atlas-asset-card-name">{asset.name}</span>
+          {asset.type === 'sheets' && asset.summary && <span className="atlas-asset-card-summary">{asset.summary}</span>}
         </div>
       </TooltipTrigger>
       <TooltipContent className="atlas-asset-card-tooltip" side="top" sideOffset={10}>

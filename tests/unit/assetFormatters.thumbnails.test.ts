@@ -125,10 +125,11 @@ describe('partitionByTab', () => {
       { id: 'scene', type: 'scene', name: 'Cave', tags: [], collection: 'default', createdAt: 1, modifiedAt: 1 },
       { id: 'enc', type: 'encounter', name: 'Ambush', tokens: [], tags: [], collection: 'default', createdAt: 1, modifiedAt: 1 },
       { id: 'party', type: 'player', name: 'Party', tokens: [], tags: [], collection: 'default', createdAt: 1, modifiedAt: 1 },
+      { id: 'raven', type: 'character', name: 'Raven', tags: [], collection: 'default', createdAt: 1, modifiedAt: 1 },
     ];
     const byTab = partitionByTab(assets);
     expect(Object.fromEntries(Object.entries(byTab).map(([tab, list]) => [tab, list.map((asset) => asset.id)]))).toEqual({
-      tokens: ['goblin'], party: ['ranger'], maps: ['map'], scenes: ['scene'], encounters: ['enc'],
+      tokens: ['goblin'], party: ['ranger'], maps: ['map'], scenes: ['scene'], encounters: ['enc'], sheets: ['raven'],
     });
   });
 });

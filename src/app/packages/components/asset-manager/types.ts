@@ -6,7 +6,7 @@ import { t } from '../../../i18n';
 
 // ─── Tab / View Constants ───────────────────────────────────────────
 
-export const tabs = ['scenes', 'maps', 'encounters', 'tokens', 'party'] as const;
+export const tabs = ['scenes', 'maps', 'encounters', 'tokens', 'party', 'sheets'] as const;
 export type Tab = (typeof tabs)[number];
 
 const tabDisplayNames: Record<Tab, string> = {
@@ -15,6 +15,7 @@ const tabDisplayNames: Record<Tab, string> = {
   encounters: t('am.tab.encounters'),
   tokens: t('am.tab.tokens'),
   party: t('am.tab.party'),
+  sheets: t('am.tab.sheets'),
 };
 
 export const getTabDisplayName = (tab: Tab): string => tabDisplayNames[tab];
@@ -84,7 +85,14 @@ export interface EncounterAsset extends Asset {
   difficulty?: StoredEncounterAsset['difficulty'];
 }
 
-export type AnyAsset = TokenAsset | MapAsset | SceneAsset | EncounterAsset;
+/** A character sheet; its art is the sheet's portrait. */
+export interface SheetAsset extends Asset {
+  type: 'sheets';
+  /** Race, class and level, shown under the name. */
+  summary: string;
+}
+
+export type AnyAsset = TokenAsset | MapAsset | SceneAsset | EncounterAsset | SheetAsset;
 
 // ─── Folder ─────────────────────────────────────────────────────────
 

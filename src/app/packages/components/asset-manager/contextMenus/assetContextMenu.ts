@@ -12,6 +12,8 @@ import {
   spawnEncounterTokens,
   spawnSelectedTokens,
   spawnTokenAsset,
+  spawnCharacterSheets,
+  openCharacterSheet,
   type SpawnContext,
 } from '../utils/tokenSpawnService';
 import { SPAWN_MULTIPLE_COUNTS } from '../utils/spawnCount';
@@ -83,6 +85,21 @@ export function buildAssetContextMenuEntries(
       icon: 'clapperboard',
       onClick: () => deps.openCreateScene(scenePrefillFromMap(asset)),
     });
+  }
+
+  // ── Character sheets ──────────────────────────────────────────
+  if (asset.type === 'sheets') {
+    const count = selectedAssets.filter((selected) => selected.type === 'sheets').length;
+    entries.push({
+      type: 'item',
+      label: count > 1 ? t('am.menu.spawnSheets', { count }) : t('am.menu.spawnSheet'),
+      icon: 'map-pin',
+      onClick: async () => {
+        const ids = await spawnCharacterSheets(spawnCtx, selectedAssets);
+        if (ids.length > 0) deps.onClose();
+      },
+    });
+    entries.push({ type: 'item', label: t('am.menu.openSheet'), icon: 'scroll-text', onClick: () => openCharacterSheet(asset.id) });
   }
 
   // ── Spawn Encounter ───────────────────────────────────────────

@@ -19,6 +19,8 @@ import { MAP_LAYER_Z } from './mapLayerOrder';
 import { createReadableMark } from './pinReadableMark';
 import { readablePinEntry } from './pinReadableMenu';
 import { t } from '../i18n';
+import { createRevealLabel, isShownToPlayers } from './playerPins/pinPlayerVisibility';
+import type { LayerVisibility } from './playerSafeFrame';
 
 /** True when anything other than the position changed, which means the pin's graphics must be rebuilt. */
 function differsBeyondPosition(pin: NotePin, prev: NotePin | undefined): boolean {
@@ -35,6 +37,8 @@ export class PinRenderer {
   private eventBus: EventEmitter;
   private pinContainer: Container;
   private pinSprites: Record<string, Container> = {};
+  /** The note text players are shown under a pin (`setReveal`), a child of that pin's group. */
+  private reveal: { pinId: string; label: Container } | null = null;
   private _unsubscribeFromStore?: () => void;
   private _notePinToolViewportListener: ((e: FederatedPointerEvent) => void) | null = null;
   private _viewportPinClickListener: ((e: FederatedPointerEvent) => void) | null = null;
@@ -234,6 +238,36 @@ export class PinRenderer {
     return this.pinContainer;
   }
 
+  /**
+   * What a players' frame shows of the pins: those shown to players (`playerVisibility`), and the
+   * note being revealed under a pin shown with its note. Everything else stays hidden from them.
+   */
+  public getPlayerViewLayers(): LayerVisibility[] {
+    const pins = this.store.getState().objects.pins;
+    const layers: LayerVisibility[] = [{ layer: this.pinContainer, visible: Object.values(pins).some(isShownToPlayers) }];
+    for (const [id, group] of Object.entries(this.pinSprites)) {
+      const pin = pins[id];
+      layers.push({ layer: group, visible: pin !== undefined && isShownToPlayers(pin) });
+    }
+    if (this.reveal) layers.push({ layer: this.reveal.label, visible: pins[this.reveal.pinId]?.playerVisibility === 'note' });
+    return layers;
+  }
+
+  /** Shows `text` under the pin in the players' frame only (the GM's canvas never shows it); no pin or text hides it. */
+  public setReveal(pinId: string | null, text = ''): void {
+    if (this.reveal) {
+      this.reveal.label.parent?.removeChild(this.reveal.label);
+      destroyTree(this.reveal.label);
+      this.reveal = null;
+    }
+    const group = pinId ? this.pinSprites[pinId] : undefined;
+    if (!pinId || !group || text === '') return;
+    const label = createRevealLabel(text);
+    label.visible = false;
+    group.addChild(label);
+    this.reveal = { pinId, label };
+  }
+
   /** Pins are DM-only: hidden in player views and whenever the DM previews the player perspective. */
   private arePinsHidden(): boolean {
     return this.isPlayerView || !this.store.getState().isGMView;
@@ -329,6 +363,7 @@ export class PinRenderer {
   
   /** Removes and destroys a pin's graphics; cached icon textures survive (no `texture` flag). */
   private clearPinGraphics(pinGroup: Container): void {
+    if (this.reveal?.label.parent === pinGroup) this.reveal = null;
     for (const child of pinGroup.removeChildren()) {
       destroyTree(child);
     }
@@ -431,6 +466,7 @@ export class PinRenderer {
       if (!newIds.has(id)) {
         const pinGroup = this.pinSprites[id];
         if (pinGroup) {
+          if (this.reveal?.pinId === id) this.reveal = null;
           destroyTree(pinGroup);
           delete this.pinSprites[id];
         }

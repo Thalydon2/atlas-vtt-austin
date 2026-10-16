@@ -162,6 +162,16 @@
   @include atlas-truncate;
 }
 
+// Race, class and level of a character sheet, under its name.
+.atlas-asset-card-summary {
+  width: 100%;
+  padding: 0 $spacing-xs;
+  text-align: center;
+  font-size: $font-ui-smaller;
+  color: var(--text-faint);
+  @include atlas-truncate;
+}
+
 // ── Badges ──────────────────────────────────────────────────────────────────
 
 .atlas-asset-card-checkbox {

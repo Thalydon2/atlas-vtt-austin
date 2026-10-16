@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
-import type { NotePin } from '../types';
+import type { NotePin, PinPlayerVisibility } from '../types';
+import { createPinPlayerPicker } from './pinPlayerPicker';
 import type { ViewAtlasState } from '../storeFactory';
 import { App, type WorkspaceLeaf } from 'obsidian';
 import type { StoreApi } from 'zustand';
@@ -20,6 +21,7 @@ interface NotePinDropdownResult {
   accepted: boolean;
   notePath?: string;
   icon?: string;
+  playerVisibility?: PinPlayerVisibility;
 }
 
 /**
@@ -38,6 +40,8 @@ export class NotePinTool {
   private outsideClickHandler: ((e: MouseEvent) => void) | null = null;
   private outsideClickTimer: number | null = null;
   private readonly preview: NotePinPreview;
+  /** New pins show to players as the last one placed did. */
+  private lastPlayerVisibility: PinPlayerVisibility | undefined;
 
   constructor(
     private readonly eventBus: EventEmitter,
@@ -169,13 +173,24 @@ export class NotePinTool {
         },
       });
 
+      // ── Player visibility: an existing pin changes at once, a new one takes it when placed ──
+      let playerVisibility = editedPin ? editedPin.playerVisibility : this.lastPlayerVisibility;
+      createPinPlayerPicker(dropdown, {
+        selected: playerVisibility,
+        onSelect: (visibility) => {
+          playerVisibility = visibility;
+          if (editedPin) this.store.getState().updateNotePin(editedPin.id, { playerVisibility: visibility });
+          else this.lastPlayerVisibility = visibility;
+        },
+      });
+
       // ── Search, results and key hints ──
       const noteSearch = createPinNoteSearch(dropdown, {
         app: this.obsidianApp,
         mapPath: this.store.getState().mapPath,
         onPick: (notePath) => {
           this.closeDropdown();
-          resolve({ accepted: true, notePath, icon: selectedIcon });
+          resolve({ accepted: true, notePath, icon: selectedIcon, ...(playerVisibility && { playerVisibility }) });
         },
         onCancel: () => {
           this.closeDropdown();
@@ -299,7 +314,7 @@ export class NotePinTool {
     const result = await this.showNotePinDropdown(worldX, worldY);
 
     if (result.accepted && result.notePath) {
-      this.store.getState().addNotePin(worldX, worldY, result.notePath, result.icon);
+      this.store.getState().addNotePin(worldX, worldY, result.notePath, result.icon, { ...(result.playerVisibility && { playerVisibility: result.playerVisibility }) });
     }
     this.releasePreviewAfterDropdown();
   }
@@ -319,7 +334,10 @@ export class NotePinTool {
     } else {
       const result = await this.showNotePinDropdown(center.x, center.y);
       if (result.accepted && result.notePath) {
-        this.store.getState().addNotePin(center.x, center.y, result.notePath, result.icon, { hex: true });
+        this.store.getState().addNotePin(center.x, center.y, result.notePath, result.icon, {
+          hex: true,
+          ...(result.playerVisibility && { playerVisibility: result.playerVisibility }),
+        });
       }
     }
     this.releasePreviewAfterDropdown();

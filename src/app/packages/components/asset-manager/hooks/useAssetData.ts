@@ -159,6 +159,7 @@ export function useAssetData(
         encounters: byTab.encounters.length,
         tokens: byTab.tokens.length,
         party: byTab.party.length,
+        sheets: byTab.sheets.length,
       };
       setCounts((previous) => (previous && tabs.every((tab) => previous[tab] === loaded[tab]) ? previous : loaded));
     } catch (error) {

@@ -5,7 +5,8 @@ import type { SightRules } from '../../vision/sightRules';
 import type { SceneState } from './atlasView.ts';
 
 /** The plugin id of Atlas, whose instance holds its settings. */
-export const ATLAS_PLUGIN_ID = 'atlas-vtt';
+/** Ids Atlas may be loaded under: Austin's fork (`manifest.json`), installed beside the official plugin, then the official one. */
+export const ATLAS_PLUGIN_IDS = ['atlas-vtt-austin', 'atlas-vtt'] as const;
 
 /**
  * What the GM's own lighting of a tab works its scene out by: the sight rules of the map's
@@ -38,6 +39,16 @@ export function field(target: unknown, name: string): unknown {
   return typeof target === 'object' && target !== null && name in target ? (target as Record<string, unknown>)[name] : undefined;
 }
 
+/** The loaded Atlas plugin instance, under whichever of its ids it runs; undefined while none is loaded. */
+export function atlasPlugin(app: unknown): unknown {
+  const plugins = field(field(app, 'plugins'), 'plugins');
+  for (const id of ATLAS_PLUGIN_IDS) {
+    const plugin = field(plugins, id);
+    if (plugin !== undefined) return plugin;
+  }
+  return undefined;
+}
+
 /**
  * The lighting source of an Atlas tab's renderer (`PixiRendererOrchestrator`): its lighting
  * controller's sight aids read the rules and measurement its lighting is built with. That
@@ -56,7 +67,7 @@ export function lightingSourceOf(renderer: unknown): LightingSource | null {
 /** Atlas's own settings as its plugin instance holds them (`settingsService`). */
 export function atlasPlayerSettings(app: App): AtlasPlayerSettings {
   // Obsidian keeps the loaded plugins by id in `app.plugins.plugins`.
-  const settings = field(field(field(field(app, 'plugins'), 'plugins'), ATLAS_PLUGIN_ID), 'settingsService');
+  const settings = field(atlasPlugin(app), 'settingsService');
   const isOn = field(settings, 'isExperimentalOn');
   const playerView = field(settings, 'getLocalPlayerViewSettings');
   const dynamicLighting = typeof isOn === 'function' ? (isOn as (id: string) => unknown).call(settings, 'dynamicLighting') : undefined;
@@ -73,7 +84,7 @@ export function atlasPlayerSettings(app: App): AtlasPlayerSettings {
 
 /** The GM's laser colour and size from Atlas's settings, as Atlas reads them (its default when they cannot be read). */
 export function atlasLaserLook(app: App): LaserPointerSettings {
-  const settings = field(field(field(field(app, 'plugins'), 'plugins'), ATLAS_PLUGIN_ID), 'settingsService');
+  const settings = field(atlasPlugin(app), 'settingsService');
   const read = field(settings, 'getLaserPointerSettings');
   const raw: unknown = typeof read === 'function' ? (read as () => unknown).call(settings) : undefined;
   return resolveLaserPointerSettings(typeof raw === 'object' && raw !== null ? raw : undefined);
@@ -118,6 +129,6 @@ export function isLit(state: SceneState, settings: AtlasPlayerSettings): boolean
 
 /** The version of the Atlas plugin loaded now, or null. */
 export function atlasVersion(app: App): string | null {
-  const version = field(field(field(field(field(app, 'plugins'), 'plugins'), ATLAS_PLUGIN_ID), 'manifest'), 'version');
+  const version = field(field(atlasPlugin(app), 'manifest'), 'version');
   return typeof version === 'string' && /^[\w.+-]{1,30}$/.test(version) ? version : null;
 }

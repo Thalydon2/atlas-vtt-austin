@@ -7,7 +7,7 @@ export type TagsByGroup = Record<TagGroup, Tag[]>;
 
 /** Characters share tags with encounters, maps with scenes. */
 export function tagGroupOfTab(tab: Tab): TagGroup {
-  return isCharacterTab(tab) || tab === 'encounters' ? 'tokens' : 'maps';
+  return isCharacterTab(tab) || tab === 'encounters' || tab === 'sheets' ? 'tokens' : 'maps';
 }
 
 /** An asset's tags with `tag` added (by name, as creators store it) or removed (by id or name). */

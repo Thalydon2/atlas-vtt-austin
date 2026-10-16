@@ -1,6 +1,7 @@
 import { TFile, type App } from 'obsidian';
 import type { AnyAsset } from '../types';
-import { spawnTokenAsset, spawnEncounterTokens, type SpawnContext } from '../utils/tokenSpawnService';
+import { spawnTokenAsset, spawnEncounterTokens, spawnCharacterSheets, openCharacterSheet, type SpawnContext } from '../utils/tokenSpawnService';
+import { loadAtlasView } from '../../../../plugin/atlasLeaves';
 import type { AssetService } from '../../../../services/AssetService';
 import type { AtlasView } from '../../../../atlas-view';
 import { useStableCallback } from '../../../../react/hooks/useStableCallback';
@@ -48,6 +49,16 @@ export function useOpenAsset(deps: OpenAssetDeps): OpenAsset {
         return;
       case 'encounters':
         await spawnEncounterTokens(spawnCtx, asset);
+        return;
+      case 'sheets': {
+        // Without a scene to place it on, a sheet opens for editing.
+        if (!(deps.view ?? await loadAtlasView(deps.app))) {
+          openCharacterSheet(asset.id);
+          return;
+        }
+        const ids = await spawnCharacterSheets(spawnCtx, [asset]);
+        if (ids.length > 0) deps.onClose();
+      }
     }
   });
 }

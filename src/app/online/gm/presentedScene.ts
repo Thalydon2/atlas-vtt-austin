@@ -1,11 +1,12 @@
 import type { App, WorkspaceLeaf } from 'obsidian';
 import type { PresentedSceneSource } from '../../services/presentedScene';
 import type { TabMetaState } from '../../stores/tabMetaStore';
-import { field } from './atlasLighting.ts';
+import { atlasPlugin, field } from './atlasLighting.ts';
 import type { SceneState } from './atlasView.ts';
 
 /** Atlas's command that shows the active map tab's scene on the player view, as the eye on a scene tab does. */
-export const PRESENT_COMMAND = 'atlas-vtt:send-map-to-player-view';
+/** Obsidian prefixes a command's id with its plugin's: this fork's id (`manifest.json`). */
+export const PRESENT_COMMAND = 'atlas-vtt-austin:send-map-to-player-view';
 
 /** The scene tab Atlas presents to its player view (`PresentedScene`): its tab id and map file. */
 export interface Presented {
@@ -47,7 +48,7 @@ export function readPresented(state: unknown): Presented | null {
 /** Atlas's presented scene as its plugin instance offers it (`presentedScene`), or null when it has none. */
 export function presentedSceneSource(app: App): PresentedSceneSource | null {
   // Obsidian keeps the loaded plugins by id in `app.plugins.plugins`.
-  const source = field(field(field(field(app, 'plugins'), 'plugins'), 'atlas-vtt'), 'presentedScene');
+  const source = field(atlasPlugin(app), 'presentedScene');
   return typeof field(source, 'get') === 'function' && typeof field(source, 'onChange') === 'function' ? (source as PresentedSceneSource) : null;
 }
 

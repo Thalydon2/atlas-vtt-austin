@@ -61,6 +61,14 @@ interface DragState {
   rulerTokenId?: string;
 }
 
+/**
+ * What a character token's hover preview shows: its character sheet, named by a path no file has so
+ * the preview system keys it apart from notes, else its statblock note. Empty for neither.
+ */
+function previewPath(token: Pick<Character, 'characterSheetId' | 'statblockPath'>): string {
+  return token.characterSheetId ? `character-sheet:${token.characterSheetId}` : token.statblockPath?.trim() ?? '';
+}
+
 export class InteractionController implements ITokenInteractionController {
   private viewport: Viewport;
   private store: StoreApi<ViewAtlasState>;
@@ -192,9 +200,10 @@ export class InteractionController implements ITokenInteractionController {
       this.handleHoverEnd(prevId);
       // Emit hide preview for previous token
       const prevToken = this.store.getState().objects.tokens[prevId];
-      if (prevToken?.kind === 'character' && prevToken.statblockPath?.trim()) {
+      const prevPath = prevToken?.kind === 'character' ? previewPath(prevToken) : '';
+      if (prevToken && prevPath) {
         this.eventBus.emit('pin-hide-preview', {
-          pin: { id: prevToken.id, notePath: prevToken.statblockPath, x: prevToken.x, y: prevToken.y, type: 'token' },
+          pin: { id: prevToken.id, notePath: prevPath, x: prevToken.x, y: prevToken.y, type: 'token' },
         });
       }
     }
@@ -205,11 +214,13 @@ export class InteractionController implements ITokenInteractionController {
       this.handleHoverStart(tokenId);
       // Emit hover preview for new token
       const token = this.store.getState().objects.tokens[tokenId];
-      if (token?.kind === 'character' && e && token.statblockPath?.trim()) {
+      const path = token?.kind === 'character' ? previewPath(token) : '';
+      if (token?.kind === 'character' && e && path) {
         this.eventBus.emit('pin-hover-preview', {
           pin: {
             id: token.id,
-            notePath: token.statblockPath,
+            notePath: path,
+            ...(token.characterSheetId && { characterSheetId: token.characterSheetId }),
             x: token.x,
             y: token.y,
             type: 'token',

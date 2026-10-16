@@ -24,6 +24,9 @@ import type { TokenVision, TokenVisionDefaults } from '../../../../types/lightin
 import { placementVision } from '../../../../creatures/placementVision';
 import { isPlayerCharacter } from '../../../../characters/playerCharacters';
 import { showNotice } from '../../../../ui/notice';
+import { readCharacterSheet } from '../../../../characterSheet/characterSheetData';
+import type { CharacterSheet } from '../../../../characterSheet/characterSheetTypes';
+import { startingResources } from '../../../../resources/statblockResourceValues';
 
 // ─── Viewport helpers ───────────────────────────────────────────────
 
@@ -146,6 +149,8 @@ interface TokenSpawnData extends StatblockOverrides {
   size?: number;
   showRing?: boolean;
   vision?: TokenVision;
+  /** The character sheet the token stands for; its hover preview shows that sheet. */
+  characterSheetId?: string;
 }
 
 /** What a spawned token inherits from its asset. */
@@ -370,4 +375,53 @@ export async function spawnSelectedTokens(
   }
 
   return addSpawnedTokens(target, tokens);
+}
+
+/** A sheet's numbers, under the statblock fields resource definitions read (`hp`, `ac`). */
+function sheetStatblock(sheet: CharacterSheet): Record<string, unknown> {
+  return {
+    hp: { current: sheet.hitPoints.current, max: sheet.hitPoints.max },
+    ac: sheet.armorClass,
+    armor_class: sheet.armorClass,
+    speed: sheet.speed,
+  };
+}
+
+/**
+ * Places a token for each character sheet among the assets, with the sheet's portrait as its art
+ * and its hit points and armour class as resources. A sheet without a portrait is left out, with a notice.
+ */
+export async function spawnCharacterSheets(ctx: SpawnContext, assets: readonly AnyAsset[]): Promise<string[]> {
+  const sheets = assets.filter((asset) => asset.type === 'sheets');
+  if (sheets.length === 0 || !ctx.assetService) return [];
+  const target = await getSpawnTarget(ctx);
+  if (!target) return [];
+  const { viewport, grid, pitch } = target;
+  const gridSystem = grid ? target.gridSystem : null;
+  const center = getViewportCenter(viewport);
+  const definitions = targetResources(ctx, target);
+  const visionDefaults = spawnVisionDefaults(ctx, target);
+  const tokens: TokenInput[] = [];
+  for (const [index, asset] of sheets.entries()) {
+    const record = await ctx.assetService.getAssetById(asset.id);
+    if (record?.type !== 'character') continue;
+    const sheet = readCharacterSheet(record.data);
+    if (!sheet.portraitPath || !imageExists(ctx.app, sheet.portraitPath)) {
+      showNotice(t('characterSheet.spawn.needsPortrait', { name: record.name }));
+      continue;
+    }
+    const pos = gridPosition(index, sheets.length, center.x, center.y, pitch, gridSystem, 1);
+    const source: TokenSource = { imagePath: sheet.portraitPath, name: record.name, statblockPath: null, playerCharacter: true };
+    const token = await buildTokenData(ctx.app, pos, source, definitions, visionDefaults);
+    const resources = startingResources(sheetStatblock(sheet), definitions);
+    if (Object.keys(resources).length > 0) token.resources = resources;
+    token.characterSheetId = record.id;
+    tokens.push(token);
+  }
+  return tokens.length > 0 ? addSpawnedTokens(target, tokens) : [];
+}
+
+/** Asks the asset manager to open a character sheet's editor. */
+export function openCharacterSheet(assetId: string): void {
+  window.dispatchEvent(new CustomEvent('open-character-sheet', { detail: { assetId } }));
 }

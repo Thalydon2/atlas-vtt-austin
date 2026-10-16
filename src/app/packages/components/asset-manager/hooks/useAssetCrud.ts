@@ -11,6 +11,7 @@ import { t } from '../../../../i18n';
 import { folderIdOf, tabFolderPath } from '../utils/assetFolders';
 import { folderMoveProblem, moveAssetsIntoFolder } from '../utils/assetFolderMove';
 import { tabHasFolders } from '../utils/tabKinds';
+import { createCharacterSheet } from '../../../../characterSheet/characterSheetAssets';
 
 /** Background and name carried over when a scene is created from a map asset. */
 export interface CreateScenePrefill {
@@ -23,6 +24,8 @@ export interface AssetCrudActions extends CollectionTransferActions {
   isTokenCreatorOpen: boolean;
   isMapCreatorOpen: boolean;
   editingToken: AnyAsset | null;
+  /** The character sheet whose editor is open. */
+  editingSheetId: string | null;
   isCreateSceneModalOpen: boolean;
   createScenePrefill: CreateScenePrefill | null;
   isCreateFolderModalOpen: boolean;
@@ -38,6 +41,7 @@ export interface AssetCrudActions extends CollectionTransferActions {
   setIsTokenCreatorOpen: (open: boolean) => void;
   setIsMapCreatorOpen: (open: boolean) => void;
   setEditingToken: (asset: AnyAsset | null) => void;
+  setEditingSheetId: (id: string | null) => void;
   setIsCreateSceneModalOpen: (open: boolean) => void;
   openCreateSceneModalFromMap: (prefill: CreateScenePrefill) => void;
   setIsCreateFolderModalOpen: (open: boolean) => void;
@@ -55,6 +59,8 @@ export interface AssetCrudActions extends CollectionTransferActions {
   handleCreateFolder: () => void;
   handleCreateMap: () => void;
   handleCreateCollection: () => void;
+  /** Adds an empty character sheet, in the open folder of the Sheets tab, and opens its editor. */
+  handleCreateSheet: () => Promise<void>;
   handleRefresh: () => Promise<void>;
   createFolderInVault: (folderName: string) => Promise<void>;
   deleteAssetFromVault: (asset: { id: string; name: string }) => Promise<boolean>;
@@ -85,6 +91,7 @@ export function useAssetCrud(
   const [isTokenCreatorOpen, setIsTokenCreatorOpen] = useState(false);
   const [isMapCreatorOpen, setIsMapCreatorOpen] = useState(false);
   const [editingToken, setEditingToken] = useState<AnyAsset | null>(null);
+  const [editingSheetId, setEditingSheetId] = useState<string | null>(null);
   const [isCreateSceneModalOpen, setIsCreateSceneModalOpen] = useState(false);
   const [createScenePrefill, setCreateScenePrefill] = useState<CreateScenePrefill | null>(null);
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
@@ -213,6 +220,23 @@ export function useAssetCrud(
 
   const handleCreateCollection = (): void => setIsCreateCollectionModalOpen(true);
 
+  const handleCreateSheet = async (): Promise<void> => {
+    if (!assetService) return;
+    try {
+      const sheet = await createCharacterSheet(assetService, selectedCollection);
+      if (selectedFolderId && activeTab === 'sheets') {
+        const result = await moveAssetsIntoFolder(app, assetService, [sheet.id], tabFolderPath(selectedCollection, 'sheets'), selectedFolderId);
+        const problem = folderMoveProblem(result);
+        if (problem) showAtlasToast(problem);
+      }
+      setEditingSheetId(sheet.id);
+      await loadAssetsForActiveTab();
+    } catch (error) {
+      console.error('[useAssetCrud] Error creating character sheet:', error);
+      showAtlasToast(t('characterSheet.createFailed', { error: error instanceof Error ? error.message : String(error) }));
+    }
+  };
+
   const handleSaveAsEncounter = async (tokenAssets: AnyAsset[]): Promise<void> => {
     if (!assetService || !app) return;
     const drafts = tokenAssets.map((t): EncounterTokenDraft => {
@@ -242,18 +266,18 @@ export function useAssetCrud(
   });
 
   return {
-    isTokenCreatorOpen, isMapCreatorOpen, editingToken,
+    isTokenCreatorOpen, isMapCreatorOpen, editingToken, editingSheetId,
     isCreateSceneModalOpen, createScenePrefill,
     isCreateFolderModalOpen, isMoveModalOpen,
     moveTargetFolderId, moveFolderSearch, moveFolderListOpen,
     targetFolderName, settingsModalCollectionId, isCreateCollectionModalOpen, inputModalState,
-    setIsTokenCreatorOpen, setIsMapCreatorOpen, setEditingToken,
+    setIsTokenCreatorOpen, setIsMapCreatorOpen, setEditingToken, setEditingSheetId,
     setIsCreateSceneModalOpen, openCreateSceneModalFromMap,
     setIsCreateFolderModalOpen, setIsMoveModalOpen,
     setMoveTargetFolderId, setMoveFolderSearch, setMoveFolderListOpen,
     setTargetFolderName, setSettingsModalCollectionId, setIsCreateCollectionModalOpen, showCreatedCollection, setInputModalState,
     handleCreateFolder, handleCreateMap,
-    handleCreateCollection, handleRefresh,
+    handleCreateCollection, handleCreateSheet, handleRefresh,
     createFolderInVault, deleteAssetFromVault, deleteFolderFromVault,
     moveAssetsToFolder, handleDrop, handleSaveAsEncounter,
     ...transfer,

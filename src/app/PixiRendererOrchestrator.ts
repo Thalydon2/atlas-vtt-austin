@@ -1,3 +1,4 @@
+import { PlayerPinReveal } from './pixi/playerPins/PlayerPinReveal';
 import { createSceneSource } from './plugin/host/sceneSource';
 import { canRunMapHotkeys, matchesMapHotkey } from './keyboard/mapHotkeys';
 import { SettingsService, type AtlasSettings } from './services/SettingsService';
@@ -68,6 +69,8 @@ export class PixiRendererOrchestrator { // Renamed class
   private pixiAppManager: PixiAppManager;
   private tokenRenderer?: TokenRenderer; // Add TokenRenderer instance
   private pinRenderer?: PinRenderer; // Add PinRenderer instance
+  /** Reveals a pin's note to players while the GM holds Cmd/Ctrl over it. */
+  private playerPinReveal: PlayerPinReveal | null = null;
   private hexLinkRenderer?: HexLinkRenderer;
   private hexLinkInteraction?: HexLinkInteraction;
   private selectionManager?: SelectionManager; // Add SelectionManager instance
@@ -365,6 +368,8 @@ export class PixiRendererOrchestrator { // Renamed class
     // Check if this is a player view through the store
     const isPlayerView = this.store.getState().isPlayerView || false;
     this.pinRenderer = new PinRenderer(viewport, this.eventBus, this.store, isPlayerView);
+    this.playerPinReveal?.destroy();
+    this.playerPinReveal = new PlayerPinReveal(this.obsApp, this.eventBus, this.store, (pinId, text) => this.pinRenderer?.setReveal(pinId, text));
 
     this.hexLinkRenderer = new HexLinkRenderer({
       viewport,
@@ -756,7 +761,7 @@ export class PixiRendererOrchestrator { // Renamed class
   /** What a players' frame changes on the stage: everything players must not see, hidden for one render. */
   private playerFrameLayers(settings: AtlasSettings['localPlayerView']): LayerVisibility[] {
     // The grid is left as the GM set it: players see it exactly as the GM does, hidden included.
-    const layers = this.markerLayers();
+    const layers = this.markerLayers({ pins: false });
     // The lighting's part is the list session view holds on this canvas (`SessionLighting`).
     const sight = this.lighting?.playerSight();
     layers.push(...(this.tokenRenderer?.getPlayerViewLayers(settings, sight) ?? []));
@@ -764,6 +769,8 @@ export class PixiRendererOrchestrator { // Renamed class
     layers.push(...(this.lighting?.playerLayers() ?? []));
     layers.push(...(this.fogRenderer?.getPlayerViewLayers() ?? []));
     layers.push(...(this.selectionManager?.getPlayerViewLayers() ?? []));
+    // Pins the GM shows to players, after everything above: they stand over the lighting and fog.
+    layers.push(...(this.pinRenderer?.getPlayerViewLayers() ?? []));
     for (const overlay of this.dmScreenOverlays) layers.push({ layer: overlay, visible: false });
     return layers;
   }
@@ -785,9 +792,9 @@ export class PixiRendererOrchestrator { // Renamed class
   }
 
   /** The GM's markers on the map: neither the players nor a picture of the scene show them. */
-  private markerLayers(): LayerVisibility[] {
+  private markerLayers({ pins }: { pins: boolean } = { pins: true }): LayerVisibility[] {
     const layers: LayerVisibility[] = [];
-    if (this.pinRenderer) layers.push({ layer: this.pinRenderer.getPinContainer(), visible: false });
+    if (pins && this.pinRenderer) layers.push({ layer: this.pinRenderer.getPinContainer(), visible: false });
     if (this.hexLinkRenderer) layers.push({ layer: this.hexLinkRenderer.container, visible: false });
     return layers;
   }
@@ -1041,6 +1048,8 @@ export class PixiRendererOrchestrator { // Renamed class
   destroy(): void {
     if (this._isDestroyed) return;
     this._isDestroyed = true;
+    this.playerPinReveal?.destroy();
+    this.playerPinReveal = null;
     // The event bus survives map switches; detach before destroying graphics.
     for (const unsubscribe of this.eventBusUnsubscribers) unsubscribe();
     this.eventBusUnsubscribers = [];

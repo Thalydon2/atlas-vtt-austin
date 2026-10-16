@@ -10,13 +10,14 @@ import type { ThumbnailAsset, ThumbnailState, ThumbnailUpdate } from '../../../.
 import { assetJsonPath, primaryPath } from '../../../../services/vault-sync/assetFiles';
 import { folderIdOf } from './assetFolders';
 import { ENCOUNTER_PREVIEW_COUNT } from './encounterPreviewLayout';
+import { readCharacterSheet, sheetSummary } from '../../../../characterSheet/characterSheetData';
 import { mapThumbnailPath } from '../../../../utils/dataFileMigration';
 import { isPlayerCharacter } from '../../../../characters/playerCharacters';
 
 /** The stored asset types the asset manager shows, one per tab. */
-export type TabServiceAsset = AssetOfType<'token' | 'map' | 'scene' | 'encounter'>;
+export type TabServiceAsset = AssetOfType<'token' | 'map' | 'scene' | 'encounter' | 'character'>;
 
-const TAB_ASSET_TYPES: ReadonlySet<ServiceAsset['type']> = new Set<TabServiceAsset['type']>(['token', 'map', 'scene', 'encounter']);
+const TAB_ASSET_TYPES: ReadonlySet<ServiceAsset['type']> = new Set<TabServiceAsset['type']>(['token', 'map', 'scene', 'encounter', 'character']);
 
 export function isTabAsset(asset: ServiceAsset): asset is TabServiceAsset {
   return TAB_ASSET_TYPES.has(asset.type);
@@ -29,6 +30,7 @@ export interface AssetsByTab {
   maps: AssetOfType<'map'>[];
   scenes: AssetOfType<'scene'>[];
   encounters: AssetOfType<'encounter'>[];
+  sheets: AssetOfType<'character'>[];
 }
 
 /** What an encounter preview needs from the token asset that shares its image. */
@@ -82,13 +84,14 @@ export function assetFolderId(asset: TabServiceAsset, tabBasePath: string): stri
 
 /** Groups stored assets by the tab that shows them; other asset types are left out. */
 export function partitionByTab(assets: readonly ServiceAsset[]): AssetsByTab {
-  const byTab: AssetsByTab = { tokens: [], party: [], maps: [], scenes: [], encounters: [] };
+  const byTab: AssetsByTab = { tokens: [], party: [], maps: [], scenes: [], encounters: [], sheets: [] };
   for (const asset of assets) {
     switch (asset.type) {
       case 'token': (isPlayerCharacter(asset) ? byTab.party : byTab.tokens).push(asset); break;
       case 'map': byTab.maps.push(asset); break;
       case 'scene': byTab.scenes.push(asset); break;
       case 'encounter': byTab.encounters.push(asset); break;
+      case 'character': byTab.sheets.push(asset); break;
       default: break;
     }
   }
@@ -209,6 +212,10 @@ export function formatServiceAsset(
     }
     case 'scene':
       return { ...base, type: 'scenes', thumbnailUrl: sceneThumbnailUrl(app, asset.data?.mapPath) };
+    case 'character': {
+      const sheet = readCharacterSheet(asset.data);
+      return { ...base, type: 'sheets', thumbnailUrl: resourceUrl(app, sheet.portraitPath), summary: sheetSummary(sheet) };
+    }
     case 'encounter': {
       // Older encounters keep these only inside their JSON payload.
       const description = asset.data?.description;

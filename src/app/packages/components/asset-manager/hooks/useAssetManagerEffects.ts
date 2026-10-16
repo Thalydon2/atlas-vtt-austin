@@ -33,7 +33,7 @@ export function useAssetManagerEffects({
   data, sel, crud, tags, statblock,
 }: EffectDeps): void {
   const isAnySubModalOpen =
-    crud.isTokenCreatorOpen || crud.isMapCreatorOpen ||
+    crud.isTokenCreatorOpen || crud.isMapCreatorOpen || Boolean(crud.editingSheetId) ||
     crud.isCreateSceneModalOpen || crud.inputModalState.isOpen ||
     crud.isMoveModalOpen || crud.settingsModalCollectionId !== null || crud.isCreateCollectionModalOpen ||
     tags.isTagManagerOpen ||
@@ -117,5 +117,13 @@ export function useAssetManagerEffects({
     };
     window.addEventListener('create-scene-from-map', handler);
     return () => window.removeEventListener('create-scene-from-map', handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = (event: WindowEventMap['open-character-sheet']): void => {
+      crud.setEditingSheetId(event.detail.assetId);
+    };
+    window.addEventListener('open-character-sheet', handler);
+    return () => window.removeEventListener('open-character-sheet', handler);
   }, []);
 }

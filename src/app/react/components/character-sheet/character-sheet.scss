@@ -1,0 +1,437 @@
+@use '../../../../../styles/tokens' as *;
+@use '../../../../../styles/mixins' as *;
+
+// The character sheet editor (`CharacterSheetWindow`) and its hover preview (`CharacterSheetPreview`).
+
+.atlas-cs-modal {
+  @include atlas-modal-overlay($z-atlas-modal);
+  pointer-events: all;
+}
+
+.atlas-cs-window {
+  @include atlas-modal-window;
+  width: 760px;
+  height: min(780px, 100%);
+  position: relative;
+  outline: none;
+}
+
+.atlas-cs-header {
+  @include atlas-modal-header;
+}
+
+.atlas-cs-name {
+  @include atlas-text-input;
+  flex: 1;
+  min-width: 0;
+  font-size: $font-ui-large;
+  font-weight: $font-weight-semibold;
+  height: auto;
+  padding-block: $spacing-xs;
+  border-color: transparent;
+  background: transparent;
+
+  &:hover:not(:disabled),
+  &:focus {
+    border-color: var(--background-modifier-border);
+    background: var(--background-modifier-form-field);
+  }
+}
+
+.atlas-cs-message {
+  margin: 0;
+  padding: $spacing-l;
+  color: var(--text-muted);
+}
+
+.atlas-cs-banner {
+  margin: 0;
+  padding: $spacing-s $spacing-l;
+  color: var(--text-muted);
+  font-size: $font-ui-smaller;
+  border-bottom: $border-width-s solid var(--divider-color);
+}
+
+.atlas-cs-tabs {
+  @include atlas-flex-row($gap: $spacing-xs);
+  padding: $spacing-s $spacing-l;
+  border-bottom: $border-width-s solid var(--divider-color);
+  flex-shrink: 0;
+}
+
+.atlas-cs-tab {
+  padding: $spacing-xs $spacing-m;
+  border-radius: $radius-m;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: $font-ui-small;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-normal);
+    background: var(--background-modifier-hover);
+  }
+
+  &.atlas-active {
+    color: var(--text-normal);
+    background: var(--background-modifier-active-hover);
+  }
+}
+
+.atlas-cs-body {
+  @include atlas-modal-body;
+  flex: 1;
+}
+
+.atlas-cs-section {
+  @include atlas-flex-col($gap: $spacing-m);
+}
+
+.atlas-cs-section-head {
+  @include atlas-flex-row($gap: $spacing-m);
+  justify-content: space-between;
+}
+
+.atlas-cs-heading {
+  margin: 0;
+  font-size: $font-ui-medium;
+  font-weight: $font-weight-semibold;
+}
+
+.atlas-cs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: $spacing-m;
+}
+
+.atlas-cs-row {
+  @include atlas-flex-row($gap: $spacing-m);
+  align-items: flex-end;
+}
+
+.atlas-cs-field {
+  @include atlas-flex-col($gap: $spacing-xs);
+  min-width: 0;
+}
+
+.atlas-cs-label {
+  @include atlas-field-label;
+}
+
+.atlas-cs-input {
+  @include atlas-text-input;
+}
+
+.atlas-cs-number {
+  text-align: center;
+  min-width: 56px;
+}
+
+.atlas-cs-textarea {
+  @include atlas-text-input;
+  height: auto;
+  padding: $spacing-s;
+  resize: vertical;
+}
+
+.atlas-cs-help {
+  @include atlas-help-text;
+  margin: 0;
+}
+
+.atlas-cs-check {
+  display: flex;
+  align-items: center;
+  gap: $spacing-s;
+  font-size: $font-ui-small;
+  cursor: pointer;
+}
+
+.atlas-cs-visually-hidden {
+  @include atlas-visually-hidden;
+}
+
+.atlas-cs-tiles {
+  @include atlas-flex-row($gap: $spacing-m);
+}
+
+.atlas-cs-tile {
+  @include atlas-flex-col($gap: 0);
+  align-items: center;
+  min-width: 112px;
+  padding: $spacing-s $spacing-m;
+  border: $border-width-s solid var(--background-modifier-border);
+  border-radius: $radius-m;
+}
+
+.atlas-cs-tile-value {
+  font-size: $font-ui-large;
+  font-weight: $font-weight-semibold;
+}
+
+.atlas-cs-tile-label {
+  font-size: $font-ui-smaller;
+  color: var(--text-muted);
+}
+
+.atlas-cs-abilities {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: $spacing-m;
+}
+
+.atlas-cs-ability {
+  @include atlas-flex-col($gap: $spacing-xs);
+  align-items: center;
+  padding: $spacing-s;
+  border: $border-width-s solid var(--background-modifier-border);
+  border-radius: $radius-m;
+}
+
+.atlas-cs-ability-name {
+  font-size: $font-ui-smaller;
+  color: var(--text-muted);
+}
+
+.atlas-cs-ability-modifier {
+  font-size: $font-ui-large;
+  font-weight: $font-weight-semibold;
+}
+
+.atlas-cs-skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: $spacing-xs $spacing-m;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.atlas-cs-skill-button {
+  display: flex;
+  align-items: center;
+  gap: $spacing-s;
+  width: 100%;
+  justify-content: flex-start;
+  background: transparent;
+  box-shadow: none;
+  font-size: $font-ui-small;
+
+  &:hover:not(:disabled) {
+    background: var(--background-modifier-hover);
+  }
+}
+
+.atlas-cs-skill-bonus {
+  min-width: 28px;
+  font-variant-numeric: tabular-nums;
+}
+
+.atlas-cs-deathsaves {
+  @include atlas-flex-row($gap: $spacing-s);
+
+  .atlas-cs-label {
+    min-width: 88px;
+  }
+}
+
+.atlas-cs-pip {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: $border-width-m solid var(--text-muted);
+  border-radius: $radius-full;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+
+  &.atlas-cs-pip-on {
+    background: var(--interactive-accent);
+    border-color: var(--interactive-accent);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.atlas-cs-slots {
+  @include atlas-flex-col($gap: $spacing-s);
+}
+
+.atlas-cs-slot-row {
+  @include atlas-flex-row($gap: $spacing-m);
+
+  .atlas-cs-field {
+    width: 64px;
+  }
+}
+
+.atlas-cs-slot-level {
+  min-width: 64px;
+  font-size: $font-ui-small;
+}
+
+.atlas-cs-pips {
+  @include atlas-flex-row($gap: $spacing-xs);
+  flex-wrap: wrap;
+}
+
+.atlas-cs-list {
+  @include atlas-flex-col($gap: $spacing-s);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.atlas-cs-spell {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) 120px auto minmax(0, 2fr) auto;
+  align-items: center;
+  gap: $spacing-s;
+}
+
+.atlas-cs-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px auto auto;
+  align-items: center;
+  gap: $spacing-s;
+}
+
+.atlas-cs-item__description {
+  grid-column: 1 / -1;
+  resize: vertical;
+  min-height: 0;
+  field-sizing: content;
+}
+
+.atlas-cs-currency {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: $spacing-m;
+}
+
+.atlas-cs-attack {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) 120px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $spacing-s;
+}
+
+.atlas-cs-attack-notes {
+  grid-column: 1 / -1;
+}
+
+.atlas-cs-checks {
+  @include atlas-flex-row($gap: $spacing-l);
+  flex-wrap: wrap;
+}
+
+.atlas-cs-portrait {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.atlas-cs-portrait-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: $radius-m;
+  border: $border-width-s solid var(--background-modifier-border);
+  background: var(--background-modifier-form-field);
+  color: var(--text-muted);
+  box-shadow: none;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--interactive-accent);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.atlas-cs-portrait-remove {
+  position: absolute;
+  top: -$spacing-xs;
+  right: -$spacing-xs;
+}
+
+// ── Hover preview ───────────────────────────────────────────────────────────
+
+.atlas-cs-preview-window {
+  max-width: min(420px, 100vw - 8px);
+}
+
+.atlas-cs-preview {
+  @include atlas-elevated-surface;
+  @include atlas-panel-radius($radius-2xl);
+  @include atlas-flex-col($gap: $spacing-m);
+  padding: $spacing-m;
+  overflow-y: auto;
+  min-height: 0;
+  color: var(--text-normal);
+  font-size: $font-ui-small;
+}
+
+.atlas-cs-preview-header {
+  @include atlas-flex-row($gap: $spacing-m);
+}
+
+.atlas-cs-preview-portrait {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: $radius-m;
+}
+
+.atlas-cs-preview-name {
+  margin: 0;
+  font-size: $font-ui-large;
+  font-weight: $font-weight-semibold;
+}
+
+.atlas-cs-preview-section {
+  @include atlas-flex-col($gap: $spacing-xs);
+}
+
+.atlas-cs-preview-heading {
+  margin: 0;
+  font-size: $font-ui-smaller;
+  font-weight: $font-weight-semibold;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.atlas-cs-preview-line {
+  margin: 0;
+}
+
+.atlas-cs-preview-abilities {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: $spacing-s;
+}
+
+.atlas-cs-preview-ability {
+  @include atlas-flex-col($gap: 0);
+  align-items: center;
+  text-align: center;
+}
+
+.atlas-cs-preview-inspiration {
+  align-self: flex-start;
+}

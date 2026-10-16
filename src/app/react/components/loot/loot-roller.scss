@@ -163,6 +163,13 @@ $loot-padding: $spacing-m; // loot-lists.scss keeps a copy
   background: var(--background-secondary);
 }
 
+// Opens the collection's Random tables settings, where bases are added and removed.
+.atlas-loot-manage {
+  width: 100%;
+  margin-top: $spacing-m;
+  justify-content: flex-start;
+}
+
 .atlas-loot-roller__main {
   @include atlas-flex-col($loot-padding);
   min-width: 0;

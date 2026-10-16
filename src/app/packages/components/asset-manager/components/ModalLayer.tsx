@@ -21,6 +21,7 @@ import { tagGroupOfTab } from '../utils/assetTags';
 import { newStatblockOption } from '../../../../statblocks/editor/create/entryPoints';
 import { openTemplateEditor } from '../../../../statblocks/editor/openTemplateEditor';
 import { isCharacterTab } from '../utils/tabKinds';
+import { CharacterSheetWindow } from '../../../../react/components/character-sheet/CharacterSheetWindow';
 
 export interface ModalLayerProps {
   isOpen: boolean;
@@ -43,7 +44,7 @@ export function ModalLayer({
     isOpen,
     isMapCreatorOpen: crud.isMapCreatorOpen,
     // Every dialog of this layer but the map creator, which says for itself whether it stays
-    isBusy: crud.isTokenCreatorOpen || crud.isCreateSceneModalOpen || crud.isMoveModalOpen || crud.isCreateFolderModalOpen
+    isBusy: crud.isTokenCreatorOpen || Boolean(crud.editingSheetId) || crud.isCreateSceneModalOpen || crud.isMoveModalOpen || crud.isCreateFolderModalOpen
       || crud.inputModalState.isOpen || crud.isCreateCollectionModalOpen || crud.settingsModalCollectionId !== null
       || crud.transfer !== null || tags.isTagManagerOpen || statblock.linkingStatblockAsset !== null,
     collectionId: selectedCollection,
@@ -79,6 +80,22 @@ export function ModalLayer({
         confirmImport={crud.confirmImport}
         closeTransfer={crud.closeTransfer}
       />
+
+      {/* Character sheet */}
+      <AnimatePresence>
+        {isOpen && crud.editingSheetId && (
+          <CharacterSheetWindow
+            key={crud.editingSheetId}
+            assetId={crud.editingSheetId}
+            assetService={data.assetService}
+            app={data.app}
+            onClose={() => {
+              crud.setEditingSheetId(null);
+              if (activeTab === 'sheets') void data.loadAssetsForActiveTab();
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Token Creator */}
       <AnimatePresence>

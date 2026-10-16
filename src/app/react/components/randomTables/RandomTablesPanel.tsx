@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { GripHorizontal } from 'lucide-react';
+import { GripHorizontal, Settings2 } from 'lucide-react';
 import { CoinIcon } from '../CoinIcon';
 import { CloseButton } from '../../../packages/components/primitives/CloseButton';
 import { useDialogWindowVariants } from '../../../packages/components/primitives/dialogMotion';
@@ -23,6 +23,7 @@ import { LootHistory, LootResults } from '../loot/LootLists';
 import { LootEmptyState } from '../loot/LootEmptyState';
 import { LootRollerTutorials } from '../loot/LootRollerTutorials';
 import { CollectionSettingsModal } from '../CollectionSettingsModal';
+import { Button } from '../../../packages/components/primitives/button';
 import { openTemplateEditor } from '../../../statblocks/editor/openTemplateEditor';
 import { useRandomTables } from './useRandomTables';
 import { librarySources, selectedSource } from './tableSelection';
@@ -186,6 +187,10 @@ function RandomTablesPanel(): React.ReactElement {
               onDisabledViewsChange={(views) => update({ disabledViews: views })}
               onNewTable={openImporter}
             />
+            <Button variant="ghost" className="atlas-loot-manage" onClick={() => setSettingsOpen(true)}>
+              <Settings2 />
+              {t('loot.manageBases')}
+            </Button>
           </aside>
           <div className="atlas-loot-roller__main">
             <div className="atlas-loot-rollbar">

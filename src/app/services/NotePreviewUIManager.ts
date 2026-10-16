@@ -5,6 +5,7 @@ import type { NotePin } from '../types';
 import type { TokenVitals } from './statblockVitalsSync';
 import { NotePreviewWindow } from './NotePreviewWindow';
 import { StatblockPreviewWindow } from './StatblockPreviewWindow';
+import { CharacterSheetPreviewWindow } from './CharacterSheetPreviewWindow';
 import { isStatblockNote, statblockNoteKnown, unparsedFrontmatterStatblock } from '../statblocks/resolve/statblockNote';
 import { MapLinkPreview } from './MapLinkPreview';
 import { linkedFilePath, linkedMapPath, linkedSceneFile } from './sceneLinks';
@@ -26,6 +27,8 @@ export interface TokenPreviewAnchor extends TokenVitals {
   x: number;
   y: number;
   type: 'token';
+  /** The token stands for this character sheet, which the preview shows instead of a note. */
+  characterSheetId?: string;
 }
 
 /** What a hover preview is anchored to: a map pin or a token. */
@@ -317,6 +320,16 @@ export class NotePreviewUIManager {
 
     // Hide all unpinned previews before creating a new one
     this.hideAllUnpinnedPreviews();
+
+    // A token placed from a character sheet shows the sheet.
+    if ('type' in pin && pin.type === 'token' && pin.characterSheetId) {
+      const sheetPreview = new CharacterSheetPreviewWindow(this.app, { ...pin, characterSheetId: pin.characterSheetId }, this, { x: screenX, y: screenY });
+      if (sheetPreview.element) {
+        this.activePreviews.set(`${pin.notePath}::${pin.id}`, sheetPreview);
+        this.raiseZIndex(sheetPreview);
+      }
+      return;
+    }
     
     // Scene links → lightweight tooltip with thumbnail + "Open Map" button; nothing for a scene not in this collection
     if (linkedMapPath(pin.notePath)) {

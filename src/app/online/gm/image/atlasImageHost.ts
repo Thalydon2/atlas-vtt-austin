@@ -1,7 +1,7 @@
 import type { App, TFile } from 'obsidian';
 import { withDecodedImage } from '../../../imageProcessing/imageElement';
 import { imageMimeType } from '../assetServe.ts';
-import { ATLAS_PLUGIN_ID, field } from '../atlasLighting.ts';
+import { atlasPlugin, field } from '../atlasLighting.ts';
 import { LOCAL_PLAYER_VIEW_TYPE } from '../atlasView.ts';
 import type { VaultImage } from '../TokenShare.ts';
 
@@ -40,7 +40,7 @@ export async function readShownFile(app: App, file: TFile): Promise<VaultImage |
 /** Atlas's image display service as its plugin instance holds it (`imageDisplayService`), unchecked. */
 export function atlasImageDisplay(app: App): unknown {
   // Obsidian keeps the loaded plugins by id in `app.plugins.plugins`.
-  return field(field(field(field(app, 'plugins'), 'plugins'), ATLAS_PLUGIN_ID), 'imageDisplayService');
+  return field(atlasPlugin(app), 'imageDisplayService');
 }
 
 /** Whether Atlas's own player window is open. */
