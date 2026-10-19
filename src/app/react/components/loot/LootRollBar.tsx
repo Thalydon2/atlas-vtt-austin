@@ -2,7 +2,7 @@ import React from 'react';
 import { Dices, Minus, Plus } from 'lucide-react';
 import { Button } from '../../../packages/components/primitives/button';
 import { LabelTooltip } from '../../../packages/components/primitives/tooltip';
-import { rarityKey } from '../../../loot/lootRoller';
+import { NO_RARITY_KEY, rarityKey } from '../../../loot/lootRoller';
 import type { RarityOption } from '../../../types/randomTableTypes';
 import { LOOT_MAX_COUNT } from '../../../stores/lootRollerSlice';
 import { t } from '../../../i18n';
@@ -10,44 +10,65 @@ import { t } from '../../../i18n';
 interface RarityTogglesProps {
   /** The collection's rarity words, in their order. */
   rarities: readonly RarityOption[];
-  /** Items of each word (`rarityKey`) in the ticked views; empty when no item names one. */
+  /** Items of each word (`rarityKey`) in the ticked views, and of none (`NO_RARITY_KEY`). */
   rarityCounts: ReadonlyMap<string, number>;
   excluded: ReadonlySet<string>;
   onExcludedChange: (excluded: string[]) => void;
 }
 
-/** A toggle per rarity word of the collection, in its tone: switched-off rarities are never rolled. */
+interface RarityToggleProps {
+  label: string;
+  /** The ladder tone it is painted in; none for no tone. */
+  tone: string | undefined;
+  count: number;
+  on: boolean;
+  onToggle: () => void;
+}
+
+function RarityToggle({ label, tone, count, on, onToggle }: RarityToggleProps): React.ReactElement {
+  const values = { count, rarity: label };
+  return (
+    <LabelTooltip describe label={on ? t('loot.rarityOn', values) : t('loot.rarityOff', values)}>
+      <button type="button" className={`atlas-loot-rarity${on ? ' is-on' : ''}`} data-rarity={tone} aria-pressed={on} onClick={onToggle}>
+        <span className="atlas-loot-rarity__gem" />
+        <span className="atlas-loot-rarity__label">{label}</span>
+        <span className="atlas-loot-rarity__count">{count}</span>
+      </button>
+    </LabelTooltip>
+  );
+}
+
+/**
+ * A toggle per rarity word of the collection, in its tone, and one for the items that name none
+ * of them: switched-off rarities are never rolled. Nothing while no item names one of the words.
+ */
 export function RarityToggles({ rarities, rarityCounts, excluded, onExcludedChange }: RarityTogglesProps): React.ReactElement | null {
-  if (rarityCounts.size === 0 || rarities.length === 0) return null;
+  if (rarities.length === 0 || !rarities.some((option) => (rarityCounts.get(rarityKey(option)) ?? 0) > 0)) return null;
   const toggle = (key: string): void => {
     const next = new Set(excluded);
     if (!next.delete(key)) next.add(key);
     onExcludedChange([...next]);
   };
+  const unrated = rarityCounts.get(NO_RARITY_KEY) ?? 0;
 
   return (
     <div className="atlas-loot-rarities" role="group" aria-label={t('loot.rarities')}>
       {rarities.map((option) => {
         const key = rarityKey(option);
-        const on = !excluded.has(key);
-        const count = rarityCounts.get(key) ?? 0;
-        const values = { count, rarity: option.name };
         return (
-          <LabelTooltip key={key} describe label={on ? t('loot.rarityOn', values) : t('loot.rarityOff', values)}>
-            <button
-              type="button"
-              className={`atlas-loot-rarity${on ? ' is-on' : ''}`}
-              data-rarity={option.tone ?? undefined}
-              aria-pressed={on}
-              onClick={() => toggle(key)}
-            >
-              <span className="atlas-loot-rarity__gem" />
-              <span className="atlas-loot-rarity__label">{option.name}</span>
-              <span className="atlas-loot-rarity__count">{count}</span>
-            </button>
-          </LabelTooltip>
+          <RarityToggle
+            key={key}
+            label={option.name}
+            tone={option.tone ?? undefined}
+            count={rarityCounts.get(key) ?? 0}
+            on={!excluded.has(key)}
+            onToggle={() => toggle(key)}
+          />
         );
       })}
+      {unrated > 0 && (
+        <RarityToggle label={t('loot.rarityNone')} tone={undefined} count={unrated} on={!excluded.has(NO_RARITY_KEY)} onToggle={() => toggle(NO_RARITY_KEY)} />
+      )}
     </div>
   );
 }

@@ -1,6 +1,12 @@
 {
-  "version": "0.8.1",
+  "version": "0.8.2",
   "releases": [
+    {
+      "version": "0.8.2",
+      "date": "2026-10-19",
+      "title": "Austin's fork — a None rarity and rarities found in your tables",
+      "markdown": "# What's New\n- The loot roller's rarity toggles have a None toggle: items with no rarity, or a rarity the collection does not list, can be left out of rolls like any rarity.\n- The Item rarities list in a collection's Random tables settings shows the rarity words your loot bases use that it does not list yet. Click one to add it as a rarity, or Add all."
+    },
     {
       "version": "0.8.1",
       "date": "2026-10-19",

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { GripVertical, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { Button } from '../../../../packages/components/primitives/button';
 import { LabelTooltip } from '../../../../packages/components/primitives/tooltip';
-import { RARITY_LABELS, RARITY_TONES, type RarityTone } from '../../../../loot/lootRarity';
+import { RARITY_LABELS, RARITY_TONES, rarityTone, type RarityTone } from '../../../../loot/lootRarity';
 import type { RarityOption } from '../../../../types/randomTableTypes';
 import { t } from '../../../../i18n';
 
@@ -14,6 +14,8 @@ interface ItemRaritiesSectionProps {
   onChange: (rarities: readonly RarityOption[]) => void;
   /** Goes back to the system's words. */
   onRevert: () => void;
+  /** Rarity words the collection's loot bases use that it does not list yet. */
+  found?: readonly string[];
 }
 
 const TONES: readonly (RarityTone | null)[] = [null, ...RARITY_TONES];
@@ -26,8 +28,10 @@ function moved<T>(list: readonly T[], from: number, to: number): T[] {
 }
 
 /** The words the collection's items name their rarity with, each painted in a tone of the ladder or none. */
-export function ItemRaritiesSection({ rarities, own, onChange, onRevert }: ItemRaritiesSectionProps): React.ReactElement {
+export function ItemRaritiesSection({ rarities, own, onChange, onRevert, found = [] }: ItemRaritiesSectionProps): React.ReactElement {
   const [dragged, setDragged] = useState<number | null>(null);
+  // A word found in the tables starts in the ladder's tone for it, or none.
+  const add = (names: readonly string[]): void => onChange([...rarities, ...names.map((name) => ({ name, tone: rarityTone(name) ?? null }))]);
   const edit = (index: number, change: Partial<RarityOption>): void =>
     onChange(rarities.map((option, i) => (i === index ? { ...option, ...change } : option)));
 
@@ -107,6 +111,24 @@ export function ItemRaritiesSection({ rarities, own, onChange, onRevert }: ItemR
         <Plus />
         {t('tables.settings.addRarity')}
       </Button>
+      {found.length > 0 && (
+        <div className="atlas-rt-found" role="group" aria-label={t('tables.settings.foundRarities')}>
+          <span className="atlas-rt-found__label">{t('tables.settings.foundRarities')}</span>
+          {found.map((name) => (
+            <LabelTooltip key={name} label={t('tables.settings.addFound', { name })}>
+              <button type="button" className="atlas-rt-found__chip" onClick={() => add([name])}>
+                <Plus />
+                {name}
+              </button>
+            </LabelTooltip>
+          ))}
+          {found.length > 1 && (
+            <Button variant="ghost" className="atlas-csm-add-btn" onClick={() => add(found)}>
+              {t('tables.settings.addAllFound')}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

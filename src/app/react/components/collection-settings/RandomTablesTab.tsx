@@ -4,6 +4,7 @@
  * name their rarity with. It never edits what a table holds: the note or base is the table.
  */
 
+import { unlistedRarities } from '../../../loot/lootRoller';
 import React, { useMemo, useState } from 'react';
 import { FileText, Plus, Table } from 'lucide-react';
 import type { App } from 'obsidian';
@@ -153,6 +154,7 @@ export function RandomTablesTab(props: RandomTablesTabProps): React.ReactElement
         own={own !== undefined}
         onChange={(next) => props.onItemRaritiesChange(editedItemRarities(next, system))}
         onRevert={() => props.onItemRaritiesChange(undefined)}
+        found={unlistedRarities(bases.flatMap((base) => base.views.flatMap((view) => view.items)), rarities)}
       />
     </>
   );

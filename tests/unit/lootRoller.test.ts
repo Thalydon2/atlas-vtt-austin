@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { LootItem } from '../../src/app/loot/lootItem';
-import { countByRarity, countDrawable, formatPrice, rollLoot, type RarityChoice } from '../../src/app/loot/lootRoller';
+import { countByRarity, countDrawable, formatPrice, rollLoot, type RarityChoice, NO_RARITY_KEY } from '../../src/app/loot/lootRoller';
 import { rarityTone, rarityToneIn } from '../../src/app/loot/lootRarity';
 import { readLootRoll } from '../../src/app/loot/lootHistory';
 import { collectionItemRarities, DEFAULT_ITEM_RARITIES } from '../../src/app/gameSystems/itemRarities';
@@ -96,7 +96,7 @@ describe('rollLoot with rarities switched off', () => {
   });
 
   it('counts the items of each word and those left to draw', () => {
-    expect(countByRarity([...LADDER, PEBBLE], DEFAULT_ITEM_RARITIES)).toEqual(new Map([['common', 1], ['uncommon', 1], ['rare', 1]]));
+    expect(countByRarity([...LADDER, PEBBLE], DEFAULT_ITEM_RARITIES)).toEqual(new Map([['common', 1], ['uncommon', 1], ['rare', 1], [NO_RARITY_KEY, 1]]));
     expect(countDrawable([...LADDER, PEBBLE], off('common'))).toBe(3);
     expect(countDrawable(LADDER, off('common', 'uncommon', 'rare'))).toBe(0);
   });

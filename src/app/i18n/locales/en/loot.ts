@@ -33,6 +33,7 @@ export const loot = {
   'loot.openFailed': 'Could not open the note',
   'loot.panel': 'Random tables',
   'loot.rarities': 'Rarities to roll',
+  'loot.rarityNone': 'None',
   'loot.rarity.common': 'Common',
   'loot.rarity.epic': 'Epic',
   'loot.rarity.legendary': 'Legendary',

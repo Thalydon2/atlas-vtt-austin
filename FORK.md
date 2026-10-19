@@ -19,6 +19,8 @@ Atlas VTT off while this one is on: both register the same views.
 - **Item pictures on loot cards**: an item whose base shows an image property (`image`, `art`,
   `cover`, `icon`…), whose note names one in its frontmatter, or whose note embeds an image shows it
   beside its name in the loot roller and the players' loot window. A click enlarges it.
+- **Rarity filters**: a None toggle in the loot roller for items with no listed rarity, and the
+  rarity words your loot bases use offered for adding under Random tables settings → Item rarities.
 - **Shift-pan**: holding Shift while right-dragging the map locks the pan to one axis.
 
 ## Getting the creator's updates
