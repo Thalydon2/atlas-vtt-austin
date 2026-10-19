@@ -73,8 +73,8 @@ function isLootDraw(value: unknown): value is LootDraw {
 
 /** A saved draw with a tone this Atlas paints; a tone it does not know is dropped, the draw kept. */
 function checkedDraw(draw: LootDraw): LootDraw {
-  const { tone, ...rest } = draw;
-  return isRarityTone(tone) ? { ...rest, tone } : rest;
+  const { tone, image, ...rest } = draw;
+  return { ...rest, ...(isRarityTone(tone) && { tone }), ...(typeof image === 'string' && { image }) };
 }
 
 function isResultField(value: unknown): value is TableResultField {

@@ -30,6 +30,8 @@ export interface LootItem {
   rarity?: string;
   type?: string;
   description?: string;
+  /** The item's picture as the base gives it: a link, a vault path or a web address (`lootImage.ts` resolves it). */
+  image?: string;
   properties: LootProperty[];
 }
 
@@ -39,6 +41,7 @@ const ROLE_PATTERNS = {
   rarity: /^(rarity|quality)$/i,
   type: /^(type|item[ _-]?type|category|kind|slot)$/i,
   description: /^(description|effect|effects|feature|features|details|text)$/i,
+  image: /^(image|img|picture|art|artwork|cover|icon|thumbnail|portrait|token)$/i,
 } as const;
 
 type Role = keyof typeof ROLE_PATTERNS;
@@ -77,6 +80,7 @@ export function toLootItems(snapshot: LootQuerySnapshot, source: string[]): Loot
     const rarity = value('rarity');
     const type = value('type');
     const description = value('description');
+    const image = value('image');
     return {
       id: entry.path,
       name: entry.name,
@@ -85,6 +89,7 @@ export function toLootItems(snapshot: LootQuerySnapshot, source: string[]): Loot
       ...(rarity && { rarity }),
       ...(type && { type }),
       ...(description && { description }),
+      ...(image && { image }),
       properties: shown.flatMap((id) => {
         const text = entry.values[id];
         return text ? [{ label: snapshot.displayNames[id] ?? propertyKey(id), value: text }] : [];

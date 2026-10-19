@@ -17,6 +17,8 @@ export const loot = {
   'loot.give.noCharacter': 'No character',
   'loot.history.empty': 'Rolls from every map of this collection are kept here',
   'loot.history.remove': 'Remove this roll',
+  'loot.image.enlarge': 'Show the picture of {name} larger',
+  'loot.image.shrink': 'Show the picture of {name} smaller',
   'loot.items': { one: '{count} item', other: '{count} items' },
   'loot.manageBases': 'Add or remove bases',
   'loot.toSheet.done': '{item} added to the gear of {character}',

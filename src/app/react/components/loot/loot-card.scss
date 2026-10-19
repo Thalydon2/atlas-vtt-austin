@@ -46,6 +46,42 @@ $loot-inset-radius: atlas-panel-inset-radius-value($loot-card-inset);
   color: var(--atlas-loot-tone);
 }
 
+// The item's picture: a thumbnail beside its name, or across the card once clicked.
+.atlas-loot-card__image {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  overflow: hidden;
+  border: $border-width-s solid var(--background-modifier-border);
+  border-radius: $radius-m;
+  background: var(--background-primary);
+  box-shadow: none;
+  cursor: zoom-in;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &.is-expanded {
+    order: 10;
+    flex-basis: 100%;
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+    cursor: zoom-out;
+
+    img {
+      height: auto;
+      max-height: 318px;
+      object-fit: contain;
+    }
+  }
+}
+
 .atlas-loot-card__kind {
   color: var(--text-muted);
   font-size: $font-ui-smaller;
@@ -67,6 +103,8 @@ $loot-inset-radius: atlas-panel-inset-radius-value($loot-card-inset);
 .atlas-loot-card__head {
   @include atlas-flex-row($spacing-s);
   align-items: flex-start;
+  // An enlarged picture takes a row of its own under the name.
+  flex-wrap: wrap;
 }
 
 .atlas-loot-card__name {
@@ -200,6 +238,11 @@ $loot-inset-radius: atlas-panel-inset-radius-value($loot-card-inset);
 .atlas-loot-card--large {
   gap: $spacing-s;
   padding: $spacing-l;
+
+  .atlas-loot-card__image:not(.is-expanded) {
+    width: 72px;
+    height: 72px;
+  }
 
   .atlas-loot-card__name {
     font-size: 20px;

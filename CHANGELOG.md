@@ -2,6 +2,14 @@
 
 <!-- Generated from changelog/*.md. Run npm run changelog:generate. -->
 
+## 0.8.1 — Austin's fork — item pictures on loot cards
+
+2026-10-19
+
+### What's New
+- Loot cards show an item's picture beside its name, in the loot roller and the players' loot window. Atlas takes it from an image property of the base (image, art, cover, icon…), else from the item note's frontmatter, else from the first image the note embeds. Click a picture to see it larger.
+- Character sheets, sheet tokens, pins shown to players, loot given to sheets and Shift-pan, from Austin's fork of 0.8.0.
+
 ## 0.8.0 — Online play and native statblocks
 
 2026-10-14

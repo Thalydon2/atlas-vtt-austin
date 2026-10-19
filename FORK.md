@@ -16,6 +16,9 @@ Atlas VTT off while this one is on: both register the same views.
   player window (Icon), and with "Icon + note", holding Cmd/Ctrl over it shows players its note.
 - **Loot to sheets**: the gift button on a rolled item adds it to a character sheet's gear, and
   "Add or remove bases" under the tables list opens the collection's Random tables settings.
+- **Item pictures on loot cards**: an item whose base shows an image property (`image`, `art`,
+  `cover`, `icon`…), whose note names one in its frontmatter, or whose note embeds an image shows it
+  beside its name in the loot roller and the players' loot window. A click enlarges it.
 - **Shift-pan**: holding Shift while right-dragging the map locks the pan to one axis.
 
 ## Getting the creator's updates

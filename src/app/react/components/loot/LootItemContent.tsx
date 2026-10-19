@@ -3,6 +3,7 @@ import { CoinIcon } from '../CoinIcon';
 import type { LootDraw } from '../../../loot/lootRoller';
 import { LootInlineText } from './LootInlineText';
 import { LootItemKind } from './LootItemKind';
+import { LootItemImage } from './LootItemImage';
 
 interface LootItemContentProps {
   draw: LootDraw;
@@ -18,12 +19,13 @@ const WIDE_PROPERTY_LENGTH = 24;
 /**
  * What a loot card shows about an item, in the DM's loot roller and in the
  * players' loot window alike: name, rarity and type, price, description and
- * properties.
+ * properties, and its picture where the item has one.
  */
 export function LootItemContent({ draw, onOpenLink, actions }: LootItemContentProps): React.ReactElement {
   return (
     <>
       <div className="atlas-loot-card__head">
+        <LootItemImage draw={draw} />
         <span className="atlas-loot-card__title">
           <span className="atlas-loot-card__name">
             <LootInlineText text={draw.name} {...(onOpenLink && { onOpenLink })} />
