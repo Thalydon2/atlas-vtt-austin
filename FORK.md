@@ -22,6 +22,8 @@ Atlas VTT off while this one is on: both register the same views.
 - **Rarity filters**: a None toggle in the loot roller for items with no listed rarity, and the
   rarity words your loot bases use offered for adding under Random tables settings → Item rarities.
 - **Shift-pan**: holding Shift while right-dragging the map locks the pan to one axis.
+- **Update notices for the fork**: Atlas's update check (0.9.0) reads this fork's `manifest.json`,
+  not the official one, and its Update button runs BRAT's update command.
 
 ## Getting the creator's updates
 

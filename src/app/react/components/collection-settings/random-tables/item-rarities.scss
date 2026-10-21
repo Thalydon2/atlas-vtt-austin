@@ -138,7 +138,7 @@
   @include atlas-flex-row($spacing-xs);
   height: $button-height-s;
   padding: 0 $spacing-s;
-  border: $border-width-s dashed var(--background-modifier-border);
+  border: $border-width-s solid var(--background-modifier-border);
   border-radius: $radius-full;
   background: transparent;
   box-shadow: none;

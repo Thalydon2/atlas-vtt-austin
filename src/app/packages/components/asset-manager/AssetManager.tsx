@@ -173,7 +173,7 @@ export default function AssetManager({ isOpen, onClose, initialTab, onExitComple
     data, sel, crud, tags, statblock,
   });
 
-  const anyModalOpen = crud.isTokenCreatorOpen || crud.isMapCreatorOpen || Boolean(crud.editingSheetId);
+  const anyModalOpen = crud.isTokenCreatorOpen || crud.isEncounterBuilderOpen || crud.isMapCreatorOpen || Boolean(crud.editingSheetId);
 
   return (
     <>
@@ -238,6 +238,7 @@ export default function AssetManager({ isOpen, onClose, initialTab, onExitComple
                   assetCounts={data.assetCounts}
                   onCreateTokens={() => crud.setIsTokenCreatorOpen(true)}
                   onCreateMap={crud.handleCreateMap}
+                  onCreateEncounter={() => crud.setIsEncounterBuilderOpen(true)}
                   onCreateSheet={() => { void crud.handleCreateSheet(); }}
                   onCreateCollection={crud.handleCreateCollection}
                   onCreateFolder={crud.handleCreateFolder}

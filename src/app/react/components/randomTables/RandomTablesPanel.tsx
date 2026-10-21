@@ -28,11 +28,12 @@ import { openTemplateEditor } from '../../../statblocks/editor/openTemplateEdito
 import { useRandomTables } from './useRandomTables';
 import { librarySources, selectedSource } from './tableSelection';
 import { TablesSidebar } from './TablesSidebar';
+import { tableName } from './tableFacts';
 import { TableSummary } from './TableSummary';
 import { TablesSkeleton } from './TablesSkeleton';
 import { useSourceRoll } from './useSourceRoll';
 import { openLink, openNote } from './openNote';
-import { setTableNoRepeats } from './tableSettingsWrite';
+import { removeLootBase, removeTableSource, setTableLabel, setTableNoRepeats } from './tableSettingsWrite';
 import { PasteTableDialog, type PastedTableNote } from './PasteTableDialog';
 import { saveImportedTables, type ImportedTableNote, type ImportSaveJournal } from '../../../randomTables/import/saveImportedTables';
 import { tableSourceId } from '../../../randomTables/tableLookup';
@@ -186,6 +187,15 @@ function RandomTablesPanel(): React.ReactElement {
               disabledViews={disabledViews}
               onDisabledViewsChange={(views) => update({ disabledViews: views })}
               onNewTable={openImporter}
+              onRename={(found, name) => {
+                if (collectionId) setTableLabel(app, collectionId, found, name);
+              }}
+              onRemove={(removed) => {
+                if (!collectionId) return;
+                if ('source' in removed) removeTableSource(app, collectionId, removed.source, tableName(removed));
+                else removeLootBase(app, collectionId, removed.path, removed.name);
+              }}
+              onOpen={(path, name) => openNote(app, path, name)}
             />
             <Button variant="ghost" className="atlas-loot-manage" onClick={() => setSettingsOpen(true)}>
               <Settings2 />

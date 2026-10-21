@@ -53,6 +53,7 @@ import { findAtlasLeafByViewId } from './utils/atlasLeafLookup';
 import { requestRender } from './pixi/RenderScheduler';
 import { MAP_LAYER_Z } from './pixi/mapLayerOrder';
 import { shownRollTokens } from './pixi/playerRollTokens';
+import type { PlayerBadgeNumbers } from './pixi/token-renderer/PlayerInstanceBadges';
 import type { ShownRollToken } from './services/playerRollSource';
 import { t } from './i18n';
 import type { MapImage } from './pixi/mapImage/MapImage';
@@ -63,6 +64,8 @@ import { MapController } from './MapController';
 import { NO_STRETCH, readMapStretch, sameStretch, type MapStretch } from './grid/mapStretch';
 import { fitZoomRange } from './pixi/fitMapRect';
 import { viewCentreInClient, worldToClient, type ClientPoint } from './pixi/utils/worldToClient';
+import { mapTokens } from './tokens/offMap';
+import { TokenPlacer } from './pixi/tokenPlacement/TokenPlacer';
 
 export class PixiRendererOrchestrator { // Renamed class
   private _isDestroyed: boolean = false;
@@ -72,6 +75,7 @@ export class PixiRendererOrchestrator { // Renamed class
   /** Reveals a pin's note to players while the GM holds Cmd/Ctrl over it. */
   private playerPinReveal: PlayerPinReveal | null = null;
   private hexLinkRenderer?: HexLinkRenderer;
+  private tokenPlacer?: TokenPlacer;
   private hexLinkInteraction?: HexLinkInteraction;
   private selectionManager?: SelectionManager; // Add SelectionManager instance
   private fogRenderer?: FogOfWarRenderer; // Add FogRenderer instance
@@ -786,6 +790,16 @@ export class PixiRendererOrchestrator { // Renamed class
     return shownRollTokens(this.store.getState(), mapPath, tokens.getTokenSprites(), () => tokens.playerFramePerception(this.lighting?.playerSight()), tokenIds);
   }
 
+  /** Whether the canvas shows the token, so it may be selected; none is shown while there is no token renderer. */
+  public canvasShowsToken(tokenId: string): boolean {
+    return this.tokenRenderer?.showsToken(tokenId) ?? false;
+  }
+
+  /** The numbers the players' instance badges show; null while there is no token renderer. */
+  public playerBadgeNumbers(): PlayerBadgeNumbers | null {
+    return this.tokenRenderer?.playerBadgeNumbers() ?? null;
+  }
+
   /** Which tokens a players' frame shows, by the scene's `sight` with committed fog; none while there is no token renderer. */
   private playersSeeInFrame(sight: TokenPerception | undefined): (tokenId: string) => boolean {
     return this.tokenRenderer?.playersSeeInFrame(sight) ?? NOTHING_SEEN;
@@ -796,6 +810,7 @@ export class PixiRendererOrchestrator { // Renamed class
     const layers: LayerVisibility[] = [];
     if (pins && this.pinRenderer) layers.push({ layer: this.pinRenderer.getPinContainer(), visible: false });
     if (this.hexLinkRenderer) layers.push({ layer: this.hexLinkRenderer.container, visible: false });
+    for (const layer of this.tokenPlacer?.layers ?? []) layers.push({ layer, visible: false });
     return layers;
   }
 
@@ -826,6 +841,25 @@ export class PixiRendererOrchestrator { // Renamed class
   getCanvasElement(): HTMLCanvasElement { return this.pixiAppManager.getCanvasElement(); }
   getGridSystem(): GridSystem | null { return this.gridSystem || null; }
   getTokenRenderer(): TokenRenderer | null { return this.tokenRenderer || null; }
+
+  /** Places spawned tokens by hand on this view's map; null until the map's tokens can be drawn. */
+  getTokenPlacer(): TokenPlacer | null {
+    if (this._isDestroyed) return null;
+    const tokens = this.tokenRenderer;
+    const viewport = this.pixiAppManager.getViewport();
+    if (!tokens || !viewport) return null;
+    this.tokenPlacer ??= new TokenPlacer({
+      app: this.pixiAppManager.app,
+      viewport,
+      canvas: this.pixiAppManager.getCanvasElement(),
+      viewId: this.viewId,
+      settings: () => SettingsService.forApp(this.obsApp),
+      store: this.store,
+      grid: () => this.gridSystem ?? null,
+      previewToken: (token) => tokens.previewToken(token),
+    });
+    return this.tokenPlacer;
+  }
 
   /**
    * Reinitialize viewport plugins after map switch to restore interactions
@@ -911,6 +945,8 @@ export class PixiRendererOrchestrator { // Renamed class
    *  Must be called after TokenRenderer is available (either from setupRenderersAndManagers or initGrid). */
   private wireViewportDispatchProviders(): void {
     if (!this.tokenRenderer) return;
+
+    this.tokenRenderer.setPlacementGuard(() => this.tokenPlacer?.active ?? false);
 
     if (this.fogRenderer) {
       this.tokenRenderer.setFogCoverageProvider(() => this.fogRenderer!.getCommittedCoverage());
@@ -1069,6 +1105,7 @@ export class PixiRendererOrchestrator { // Renamed class
     
     // Remove drawing tool handlers
 
+    this.tokenPlacer?.destroy();
     this.tokenRenderer?.destroy(); // Destroy TokenRenderer
     this.pinRenderer?.destroy(); // Destroy PinRenderer
     this.hexLinkInteraction?.destroy();
@@ -1136,7 +1173,7 @@ export class PixiRendererOrchestrator { // Renamed class
     if (!snapToGrid) return;
     
     // Handle position snapping
-    const tokens = state.objects?.tokens || {};
+    const tokens = mapTokens(state.objects);
     const tokenUpdates: Array<{id: string, x: number, y: number}> = [];
     
     for (const [id, token] of Object.entries(tokens)) {
