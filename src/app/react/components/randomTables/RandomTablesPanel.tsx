@@ -116,6 +116,7 @@ function RandomTablesPanel(): React.ReactElement {
   const openImporter = (): void => {
     setImportCollection(collectionId);
   };
+  const openNoteTables = (): void => setSettingsOpen(true);
 
   const savePasted = async (note: PastedTableNote, journal: ImportSaveJournal): Promise<void> => {
     if (!importCollection) throw new Error('No destination collection');
@@ -174,7 +175,7 @@ function RandomTablesPanel(): React.ReactElement {
           inCollection={collectionId !== null}
           basesOff={basesOff && hasSources}
           onNewTable={openImporter}
-          onUseNote={() => setSettingsOpen(true)}
+          onUseNote={openNoteTables}
         />
       ) : (
         <div className="atlas-loot-roller__body">
@@ -187,6 +188,7 @@ function RandomTablesPanel(): React.ReactElement {
               disabledViews={disabledViews}
               onDisabledViewsChange={(views) => update({ disabledViews: views })}
               onNewTable={openImporter}
+              onUseNote={openNoteTables}
               onRename={(found, name) => {
                 if (collectionId) setTableLabel(app, collectionId, found, name);
               }}
