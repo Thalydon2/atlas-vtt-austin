@@ -6,6 +6,7 @@ import { RenderScheduler } from "./RenderScheduler";
 import { destroyTree } from "./utils/destroyTree";
 import { usesCanvasRenderer } from "./utils/rendererType";
 import { webglAvailable } from "./utils/webglAvailable";
+import { addRendererSystemsByEntry } from "./utils/rendererSystems";
 import { showSoftwareRenderingNotice } from "./softwareRenderingNotice";
 import { MAX_ZOOM, MIN_ZOOM } from "./zoomRange";
 import { bindPopoutCanvas } from "./popout/bindPopoutCanvas";
@@ -28,6 +29,7 @@ export class PixiAppManager {
     this.width = initialWidth;
     this.height = initialHeight;
     this.canvasEl = createEl('canvas');
+    addRendererSystemsByEntry();
     this.app = new Application();
   }
 

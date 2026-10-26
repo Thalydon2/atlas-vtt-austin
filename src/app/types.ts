@@ -3,11 +3,12 @@
 
 import type { SideId } from './types/initiativeRulesTypes';
 import type { LightEmission, TokenVision } from './types/lightingTypes';
+import type { OnOneLevel } from './types/sceneLevelTypes';
 
 /**
  * Note pin object that links to an Obsidian note
  */
-export interface NotePin {
+export interface NotePin extends OnOneLevel {
   id: string;
   kind: 'pin';
   x: number;
@@ -22,6 +23,12 @@ export interface NotePin {
   readable?: true;
   /** Shown in the local player window: its icon, or its icon and, while the GM holds Cmd/Ctrl over it, its note. Unset: GM only. */
   playerVisibility?: PinPlayerVisibility;
+  /**
+   * The level of the linked scene the pin opens (a scene link only); unset opens the scene as it
+   * opens, on the level its tab last showed. Read with `pinSceneLevel`: a level the scene no longer
+   * has opens the first.
+   */
+  sceneLevel?: string;
 }
 
 /** How a note pin shows in the local player window (`NotePin.playerVisibility`). */
@@ -34,7 +41,9 @@ export interface TokenResourceValue {
 }
 
 /** Base interface for any token entity. */
-export interface BaseToken {
+export interface BaseToken extends OnOneLevel {
+  /** Height above its level's floor in game units (flying); unset stands on the floor. */
+  elevation?: number;
   /** False preserves the whole artwork without an Atlas frame. Defaults to true. */
   showRing?: boolean;
   /** Expendable resources by definition key; see `src/app/resources/`. */
@@ -119,7 +128,7 @@ export type TokenStateSnapshot = Omit<TokenEntity, 'id' | 'x' | 'y' | 'instanceN
 /**
  * Text element object for map annotations
  */
-export interface TextElement {
+export interface TextElement extends OnOneLevel {
   id: string;
   kind: 'text';
   x: number;
@@ -143,7 +152,7 @@ export interface TextElement {
   scale?: number;
 }
 
-export interface DrawingStroke {
+export interface DrawingStroke extends OnOneLevel {
   id: string;
   kind: 'drawing';
   timestamp: number;

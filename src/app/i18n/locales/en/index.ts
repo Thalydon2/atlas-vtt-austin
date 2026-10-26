@@ -32,12 +32,15 @@ import { loot } from './loot';
 import { tables } from './tables';
 import { lpv } from './lpv';
 import { map } from './map';
+import { mapFeature } from './mapFeature';
 import { menu } from './menu';
 import { notice } from './notice';
 import { palette } from './palette';
 import { picker } from './picker';
 import { settings } from './settings';
 import { snapshots } from './snapshots';
+import { levels } from './levels';
+import { openings } from './openings';
 import { statblock } from './statblock';
 import { switcher } from './switcher';
 import { tabs } from './tabs';
@@ -60,6 +63,9 @@ import { laser } from './laser';
 import { text } from './text';
 import { audio } from './audio';
 import { drawing } from './drawing';
+import { dungeon } from './dungeon';
+import { dungeonProp } from './dungeonProp';
+import { dungeonScene } from './dungeonScene';
 import { editToken } from './editToken';
 import { hex } from './hex';
 import { light } from './light';
@@ -92,6 +98,9 @@ import { migration } from './migration';
 import { wall } from './wall';
 import { sceneLight } from './sceneLight';
 import { vision } from './vision';
+import { videoMap } from './videoMap';
+import { uvttFloors } from './uvttFloors';
+import { uvtt } from './uvtt';
 
 /** English, the source language: every key exists here, and other languages translate a subset of it. */
 export const en = {
@@ -129,12 +138,15 @@ export const en = {
   ...tables,
   ...lpv,
   ...map,
+  ...mapFeature,
   ...menu,
   ...notice,
   ...palette,
   ...picker,
   ...settings,
   ...snapshots,
+  ...levels,
+  ...openings,
   ...statblock,
   ...switcher,
   ...tabs,
@@ -157,6 +169,9 @@ export const en = {
   ...text,
   ...audio,
   ...drawing,
+  ...dungeon,
+  ...dungeonProp,
+  ...dungeonScene,
   ...editToken,
   ...hex,
   ...light,
@@ -191,4 +206,7 @@ export const en = {
   ...wall,
   ...sceneLight,
   ...vision,
+  ...videoMap,
+  ...uvttFloors,
+  ...uvtt,
 } as const;

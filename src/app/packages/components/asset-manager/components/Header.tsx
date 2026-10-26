@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import {
   Plus, ChevronLeft, ChevronRight, FolderPlus, PanelLeft,
-  Map as MapIcon, FolderOpen, Swords, ScrollText,
+  Map as MapIcon, FolderOpen, Swords, Castle, ScrollText,
 } from 'lucide-react';
 import { Button } from '../../primitives/button';
 import { LabelTooltip } from '../../primitives/tooltip';
@@ -28,6 +28,8 @@ export interface HeaderProps {
   assetCounts: Record<Tab, number> | null;
   onCreateTokens?: () => void;
   onCreateMap?: () => void;
+  /** Opens the dungeon generator in a tab of its own. */
+  onGenerateDungeon?: () => void;
   onCreateEncounter?: () => void;
   onCreateSheet?: () => void;
   onCreateCollection?: () => void;
@@ -56,6 +58,7 @@ export function Header({
   assetCounts,
   onCreateTokens,
   onCreateMap,
+  onGenerateDungeon,
   onCreateEncounter,
   onCreateSheet,
   onCreateCollection,
@@ -121,6 +124,7 @@ export function Header({
             items={[
               { key: 'token', label: t('am.header.createToken'), icon: <TokenIcon />, onSelect: onCreateTokens },
               { key: 'map', label: t('am.header.addMap'), icon: <MapIcon />, onSelect: onCreateMap },
+              { key: 'dungeon', label: t('am.header.generateDungeon'), icon: <Castle />, onSelect: onGenerateDungeon },
               { key: 'encounter', label: t('am.header.createEncounter'), icon: <Swords />, onSelect: onCreateEncounter },
               { key: 'sheet', label: t('am.header.createSheet'), icon: <ScrollText />, onSelect: onCreateSheet },
               { key: 'folder', label: t('am.header.newFolder'), icon: <FolderPlus />, disabled: !tabHasFolders(activeTab), onSelect: onCreateFolder },

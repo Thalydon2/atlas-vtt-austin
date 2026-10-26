@@ -32,6 +32,7 @@ import { tableName } from './tableFacts';
 import { TableSummary } from './TableSummary';
 import { TablesSkeleton } from './TablesSkeleton';
 import { useSourceRoll } from './useSourceRoll';
+import { useGeneratorCards } from './useGeneratorCards';
 import { openLink, openNote } from './openNote';
 import { removeLootBase, removeTableSource, setTableLabel, setTableNoRepeats } from './tableSettingsWrite';
 import { PasteTableDialog, type PastedTableNote } from './PasteTableDialog';
@@ -94,6 +95,7 @@ function RandomTablesPanel(): React.ReactElement {
   const excludedRarities = useMemo(() => new Set(state.excludedRarities), [state.excludedRarities]);
   const source = selectedSource(library, state.selected);
   const sourceRoll = useSourceRoll(source, library, { disabledViews, excludedRarities }, state.count);
+  const generatorCards = useGeneratorCards(app, collectionId, library);
 
   const roll = (): void => {
     if (!collectionId) return;
@@ -239,9 +241,14 @@ function RandomTablesPanel(): React.ReactElement {
             />
             <div className="atlas-loot-list">
               {state.pane === 'results' ? (
-                <LootResults roll={state.lastRoll} fresh={state.lastRoll?.id === freshRollId} {...cardHandlers} />
+                <LootResults roll={state.lastRoll} fresh={state.lastRoll?.id === freshRollId} {...cardHandlers} generator={generatorCards.latest} />
               ) : (
-                <LootHistory rolls={history} onRemove={(rollId) => LootHistoryStore.forApp(app).remove(collectionId, rollId)} {...cardHandlers} />
+                <LootHistory
+                  rolls={history}
+                  onRemove={(rollId) => LootHistoryStore.forApp(app).remove(collectionId, rollId)}
+                  {...cardHandlers}
+                  generator={generatorCards.history}
+                />
               )}
             </div>
           </div>
